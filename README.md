@@ -1,11 +1,14 @@
 # EmojiMashup
 
 A [Vencord](https://vencord.dev) userplugin that adds a **Mashup** tab to Discord's
-emoji picker, for browsing and sending [Emoji Kitchen](https://emojikitchen.dev)
-combinations.
+emoji picker, with two ways to combine emoji:
 
-Pick an emoji, browse the ~475 mashups it actually has, click one to send.
-147,000 combinations across 619 emoji, bundled — no API key, no server, no account.
+- **[Emoji Kitchen](https://emojikitchen.dev)** — 147,000 combinations across 619
+  emoji, hand-drawn by Google. Bundled, so no API key, server or account.
+- **Faces** — mashups built at runtime from cut-up Twemoji, in the style of the
+  original [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot).
+
+Pick an emoji, browse the mashups it actually has, click one to send.
 
 <!-- TODO: screenshot of the Mashup tab, and one of a mashup sent in chat -->
 

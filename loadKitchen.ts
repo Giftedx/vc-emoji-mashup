@@ -26,8 +26,3 @@ export function loadKitchen(): Promise<Kitchen> {
 
     return cached;
 }
-
-/** Test seam: drops the memoised instance. */
-export function resetKitchenCache(): void {
-    cached = null;
-}

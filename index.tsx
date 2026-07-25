@@ -114,7 +114,7 @@ const MashupChatBarButton: ChatBarButtonFactory = ({ isMainChat }) => {
 
 export default definePlugin({
     name: "EmojiMashup",
-    description: "Browse and send Google Emoji Kitchen mashups from the emoji picker",
+    description: "Adds a Mashup tab to the emoji picker: Google's Emoji Kitchen combinations, plus generated Twemoji face mashups",
     tags: ["Emoji", "Chat"],
     authors: [{ name: "Giftedx", id: 258276274726895617n }],
     settings,

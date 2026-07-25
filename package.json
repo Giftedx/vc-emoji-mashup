@@ -1,7 +1,7 @@
 {
   "name": "dismoji",
   "version": "0.1.0",
-  "description": "Emoji Kitchen mashup tab for Discord, as a Vencord userplugin",
+  "description": "Vencord userplugin adding a Mashup tab to Discord's emoji picker — Emoji Kitchen combinations plus generated Twemoji face mashups",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "private": true,
