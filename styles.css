@@ -120,10 +120,12 @@
     flex: 0 0 auto;
 }
 
+/* Height cap and spacing only. The scrollbar is Discord's, from ScrollerThin —
+   the same reason .vc-mashup-scroller sets no overflow of its own. */
 .vc-mashup-recents {
     max-height: 88px;
-    overflow-y: auto;
     margin-bottom: 8px;
+    flex: 0 0 auto;
 }
 
 .vc-mashup-cell {

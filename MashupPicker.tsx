@@ -393,23 +393,25 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                 {recents.length > 0 && !query && category === ALL && (
                     <>
                         <div className="vc-mashup-label">Recent</div>
-                        <div className="vc-mashup-grid vc-mashup-recents">
-                            {recents.map(r => (
-                                <button
-                                    type="button"
-                                    key={r.url}
-                                    className="vc-mashup-cell"
-                                    title={`${k.nameOf(r.left)} + ${k.nameOf(r.right)}`}
-                                    onClick={() => choose(r.left, {
-                                        partner: r.right,
-                                        url: r.url,
-                                        name: k.nameOf(r.right)
-                                    })}
-                                >
-                                    {thumbnail(r.url, "", r.left, r.right)}
-                                </button>
-                            ))}
-                        </div>
+                        <ScrollerThin className="vc-mashup-recents" fade>
+                            <div className="vc-mashup-grid">
+                                {recents.map(r => (
+                                    <button
+                                        type="button"
+                                        key={r.url}
+                                        className="vc-mashup-cell"
+                                        title={`${k.nameOf(r.left)} + ${k.nameOf(r.right)}`}
+                                        onClick={() => choose(r.left, {
+                                            partner: r.right,
+                                            url: r.url,
+                                            name: k.nameOf(r.right)
+                                        })}
+                                    >
+                                        {thumbnail(r.url, "", r.left, r.right)}
+                                    </button>
+                                ))}
+                            </div>
+                        </ScrollerThin>
                     </>
                 )}
 
