@@ -16,13 +16,25 @@
     padding: 0 8px 8px;
 }
 
-/* The buttons themselves wear Discord's own nav classes, so this is layout only
-   — never appearance. Styling them here would be imitating what we can inherit. */
+/* The buttons wear Discord's own nav classes, so this is layout only — never
+   appearance. Styling them here would imitate what we can inherit. */
 .dismoji-modes {
     display: flex;
     flex: 0 0 auto;
     margin-bottom: 4px;
     padding: 0 4px;
+}
+
+/* Strips the user-agent's <button> chrome and nothing else. Discord's navButton
+   class never needed this, so it doesn't provide it, and without the reset the
+   UA's white buttonface shows through under their light-grey label.
+   Deliberately does NOT set font-size, weight or colour — those are Discord's. */
+.dismoji-modes > [role="tab"] {
+    appearance: none;
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
 }
 
 .dismoji-hint {
