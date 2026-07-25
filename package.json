@@ -8,7 +8,9 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.dev.json --noEmit",
-    "build-index": "tsx scripts/build-index.mts"
+    "build-index": "tsx scripts/build-index.mts",
+    "build-parts": "tsx scripts/build-parts.mts",
+    "verify-parts": "tsx scripts/verify-parts.mts"
   },
   "devEngines": {
     "packageManager": {
@@ -24,3 +26,5 @@
     "vitest": "^4.1.10"
   }
 }
+
+
