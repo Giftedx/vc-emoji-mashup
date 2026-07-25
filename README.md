@@ -244,11 +244,19 @@ job goes red — and since the tab is the only surface, that is the warning that
 matters.
 
 Step 5 stays manual: whether a mashup actually arrives in a channel needs a
-logged-in client, and no gate here does that for you. It was last performed on
-2026-07-25 against build 582977, covering both engines — Kitchen sending its URL
-and Faces uploading its flattened image — plus re-sending from the Recent row.
-Kitchen mode was re-checked after the index moved to a runtime fetch, since that
-changed how it loads.
+logged-in client, and no gate here does that for you.
+
+**It has not been performed against current code.** The last run, on 2026-07-25,
+covered both engines and the Recent row, but the client it ran against was built
+from a source copy predating the runtime-fetch change — so it exercised the
+bundled index, and a surface that no longer exists. Nothing was wrong with the
+test; the installed plugin was a detached copy that had drifted, which is exactly
+why the installation instructions say to clone.
+
+The lesson is worth keeping: a manual smoke proves whatever the client was
+actually built from, which is not necessarily what the repository says. Before
+recording one, confirm the build is current — `git -C src/userplugins/emojiMashup
+log -1` against this repository's HEAD, then rebuild.
 
 ## Limitations
 
