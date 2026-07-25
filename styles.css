@@ -7,18 +7,39 @@
     padding: 8px;
 }
 
-.dismoji-search {
+.dismoji-controls {
     position: sticky;
     top: 0;
     z-index: 1;
-    width: 100%;
+    display: flex;
+    gap: 6px;
     margin-bottom: 8px;
+    padding-bottom: 4px;
+    background: var(--background-primary);
+}
+
+.dismoji-search {
+    flex: 1 1 auto;
+    min-width: 0;
     padding: 6px 8px;
     border: none;
     border-radius: 4px;
     background: var(--input-background);
     color: var(--text-normal);
     font-size: 14px;
+}
+
+.dismoji-category {
+    flex: 0 0 auto;
+    max-width: 45%;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 4px;
+    background: var(--input-background);
+    color: var(--text-normal);
+    font-size: 13px;
+    text-transform: capitalize;
+    cursor: pointer;
 }
 
 .dismoji-label {

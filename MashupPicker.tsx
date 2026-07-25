@@ -6,6 +6,9 @@ import { getRecents, pushRecent, type Recent } from "./recents";
 
 const GSTATIC = "https://www.gstatic.com";
 
+/** Sentinel for the "every category" option in the category dropdown. */
+const ALL = "\0all";
+
 interface Props {
     onPick(url: string): void;
 }
@@ -30,6 +33,7 @@ export function MashupPicker({ onPick }: Props) {
     const [recents, setRecents] = useState<Recent[]>([]);
     const [previewsAllowed, setPreviewsAllowed] = useState<boolean | null>(null);
     const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
+    const [category, setCategory] = useState(ALL);
 
     useEffect(() => {
         loadKitchen().then(setKitchen, e => setError(String(e)));
@@ -109,17 +113,35 @@ export function MashupPicker({ onPick }: Props) {
             </button>
         );
 
+        // The dropdown is a persistent scope; search narrows within it.
+        const base = query ? k.search(query) : k.emoji;
+        const visible = category === ALL
+            ? base
+            : base.filter(cp => (k.categoryOf(cp) || "other") === category);
+
         return (
             <div className="dismoji-root">
                 {notice}
-                <input
-                    className="dismoji-search"
-                    placeholder="Search emoji…"
-                    value={query}
-                    onChange={e => setQuery(e.currentTarget.value)}
-                />
+                <div className="dismoji-controls">
+                    <input
+                        className="dismoji-search"
+                        placeholder="Search emoji…"
+                        value={query}
+                        onChange={e => setQuery(e.currentTarget.value)}
+                    />
+                    <select
+                        className="dismoji-category"
+                        value={category}
+                        onChange={e => setCategory(e.currentTarget.value)}
+                    >
+                        <option value={ALL}>All categories</option>
+                        {grouped.map(([name, cps]) => (
+                            <option key={name} value={name}>{name} ({cps.length})</option>
+                        ))}
+                    </select>
+                </div>
 
-                {recents.length > 0 && !query && (
+                {recents.length > 0 && !query && category === ALL && (
                     <>
                         <div className="dismoji-label">Recent</div>
                         <div className="dismoji-grid dismoji-recents">
@@ -137,14 +159,18 @@ export function MashupPicker({ onPick }: Props) {
                     </>
                 )}
 
-                {query
-                    ? <div className="dismoji-grid">{k.search(query).map(emojiCell)}</div>
-                    : grouped.map(([category, codepoints]) => (
-                        <React.Fragment key={category}>
-                            <div className="dismoji-label">{category}</div>
-                            <div className="dismoji-grid">{codepoints.map(emojiCell)}</div>
-                        </React.Fragment>
-                    ))}
+                {visible.length === 0
+                    ? <div className="dismoji-state">No emoji match “{query}”.</div>
+                    : query || category !== ALL
+                        // Flat grid: the category labels would be redundant once
+                        // the list is already scoped by the dropdown or a search.
+                        ? <div className="dismoji-grid">{visible.map(emojiCell)}</div>
+                        : grouped.map(([name, codepoints]) => (
+                            <React.Fragment key={name}>
+                                <div className="dismoji-label">{name}</div>
+                                <div className="dismoji-grid">{codepoints.map(emojiCell)}</div>
+                            </React.Fragment>
+                        ))}
             </div>
         );
     }
