@@ -83,9 +83,19 @@
 }
 
 .dismoji-cell-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
     font-size: 26px;
-    line-height: 1.2;
+    line-height: 1;
     text-align: center;
+}
+
+.dismoji-set-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
 }
 
 /* Shown when a mashup image cannot load — CSP not yet granted, or a missing

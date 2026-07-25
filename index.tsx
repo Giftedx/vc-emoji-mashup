@@ -1,30 +1,14 @@
 import "./styles.css";
 
 import { ChatBarButton, type ChatBarButtonFactory } from "@api/ChatButtons";
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { copyWithToast, insertTextIntoChatInputBox } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { ExpressionPickerStore, Text } from "@webpack/common";
 
 import { MashupPicker } from "./MashupPicker";
-
-const settings = definePluginSettings({
-    sendMode: {
-        type: OptionType.SELECT,
-        description: "What clicking a mashup does",
-        options: [
-            { label: "Insert the URL into the message box", value: "insert", default: true },
-            { label: "Copy the URL to the clipboard", value: "copy" }
-        ]
-    },
-    autoClose: {
-        type: OptionType.BOOLEAN,
-        description: "Close the picker after choosing a mashup",
-        default: true
-    }
-});
+import { settings } from "./settings";
 
 function handlePick(url: string) {
     if (settings.store.sendMode === "copy") {

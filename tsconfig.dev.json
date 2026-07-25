@@ -20,5 +20,5 @@
     "verbatimModuleSyntax": true,
     "types": ["node"]
   },
-  "include": ["codec.ts", "kitchen.ts", "loadKitchen.ts", "kitchenData.ts", "test", "scripts"]
+  "include": ["codec.ts", "kitchen.ts", "loadKitchen.ts", "kitchenData.ts", "emojiSets.ts", "test", "scripts"]
 }

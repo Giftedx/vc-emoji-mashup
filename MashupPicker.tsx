@@ -1,8 +1,32 @@
 import { React, useEffect, useMemo, useState } from "@webpack/common";
 
+import { type EmojiSet, emojiAssetUrls } from "./emojiSets";
 import { type Kitchen, type Mashup, toEmojiChar } from "./kitchen";
 import { loadKitchen } from "./loadKitchen";
 import { getRecents, pushRecent, type Recent } from "./recents";
+import { settings } from "./settings";
+
+/**
+ * A single emoji rendered in the chosen set, walking its candidate URLs and
+ * finally falling back to the character itself. Never renders nothing.
+ */
+function SetEmoji({ codepoint, set }: { codepoint: string; set: EmojiSet; }) {
+    const [attempt, setAttempt] = useState(0);
+    const urls = emojiAssetUrls(set, codepoint);
+    const char = toEmojiChar(codepoint);
+
+    if (attempt >= urls.length) return <>{char}</>;
+
+    return (
+        <img
+            className="dismoji-set-img"
+            src={urls[attempt]}
+            alt={char}
+            loading="lazy"
+            onError={() => setAttempt(a => a + 1)}
+        />
+    );
+}
 
 const GSTATIC = "https://www.gstatic.com";
 
@@ -34,6 +58,9 @@ export function MashupPicker({ onPick }: Props) {
     const [previewsAllowed, setPreviewsAllowed] = useState<boolean | null>(null);
     const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
     const [category, setCategory] = useState(ALL);
+
+    // Must sit with the other hooks, above every early return.
+    const emojiSet = settings.use(["emojiSet"]).emojiSet as EmojiSet;
 
     useEffect(() => {
         loadKitchen().then(setKitchen, e => setError(String(e)));
@@ -109,7 +136,7 @@ export function MashupPicker({ onPick }: Props) {
                 title={k.nameOf(cp)}
                 onClick={() => { setLeft(cp); setQuery(""); }}
             >
-                {toEmojiChar(cp)}
+                <SetEmoji codepoint={cp} set={emojiSet} />
             </button>
         );
 
