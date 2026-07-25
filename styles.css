@@ -99,16 +99,22 @@
 }
 
 /* Shown when a mashup image cannot load — CSP not yet granted, or a missing
-   asset. Two emoji side by side, scaled down to fit the cell. */
+   asset. The two source emoji side by side, in the selected set. */
 .dismoji-cell-fallback {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     aspect-ratio: 1;
-    font-size: 15px;
-    letter-spacing: -2px;
+    gap: 1px;
+    font-size: 14px;
+    line-height: 1;
     white-space: nowrap;
+}
+
+.dismoji-cell-fallback .dismoji-set-img {
+    width: 48%;
+    aspect-ratio: 1;
 }
 
 .dismoji-header {
@@ -120,7 +126,17 @@
 }
 
 .dismoji-chosen {
-    font-size: 24px;
+    display: inline-flex;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.dismoji-chosen .dismoji-set-img {
+    width: 24px;
+    height: 24px;
 }
 
 .dismoji-count {

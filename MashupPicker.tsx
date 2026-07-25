@@ -105,12 +105,18 @@ export function MashupPicker({ onPick }: Props) {
     }
 
     /**
-     * A mashup thumbnail that degrades to text rather than vanishing.
-     * `fallback` is what the cell shows when the image cannot be displayed.
+     * A mashup thumbnail that degrades to the two source emoji rather than
+     * vanishing. The fallback honours the selected emoji set, so a blocked
+     * preview still looks like the rest of the picker.
      */
-    function thumbnail(url: string, alt: string, fallback: string) {
+    function thumbnail(url: string, alt: string, a: string, b: string) {
         if (previewsAllowed === false || failed.has(url)) {
-            return <span className="dismoji-cell-fallback">{fallback}</span>;
+            return (
+                <span className="dismoji-cell-fallback">
+                    <SetEmoji codepoint={a} set={emojiSet} />
+                    <SetEmoji codepoint={b} set={emojiSet} />
+                </span>
+            );
         }
         return <img src={url} alt={alt} loading="lazy" onError={() => markFailed(url)} />;
     }
@@ -179,7 +185,7 @@ export function MashupPicker({ onPick }: Props) {
                                     title={`${k.nameOf(r.left)} + ${k.nameOf(r.right)}`}
                                     onClick={() => onPick(r.url)}
                                 >
-                                    {thumbnail(r.url, "", toEmojiChar(r.left) + toEmojiChar(r.right))}
+                                    {thumbnail(r.url, "", r.left, r.right)}
                                 </button>
                             ))}
                         </div>
@@ -215,7 +221,7 @@ export function MashupPicker({ onPick }: Props) {
                 <button className="dismoji-back" onClick={() => { setLeft(null); setQuery(""); }}>
                     ‹ Back
                 </button>
-                <span className="dismoji-chosen">{toEmojiChar(left)}</span>
+                <span className="dismoji-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
                 <span className="dismoji-count">{k.nameOf(left)} — {all.length} mashups</span>
             </div>
 
@@ -237,7 +243,7 @@ export function MashupPicker({ onPick }: Props) {
                                 title={`${k.nameOf(left!)} + ${m.name}`}
                                 onClick={() => choose(left!, m)}
                             >
-                                {thumbnail(m.url, m.name, toEmojiChar(left!) + toEmojiChar(m.partner))}
+                                {thumbnail(m.url, m.name, left!, m.partner)}
                             </button>
                         ))}
                     </div>
