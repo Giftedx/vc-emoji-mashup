@@ -31,10 +31,17 @@
    Deliberately does NOT set font-size, weight or colour — those are Discord's. */
 .dismoji-modes > [role="tab"] {
     appearance: none;
-    background: none;
     border: none;
     font-family: inherit;
     cursor: pointer;
+}
+
+/* Applied only while a button is NOT selected. Clearing the background here
+   rather than on every button keeps this from outranking navButtonActive,
+   which is a single class and would otherwise lose the specificity contest —
+   taking the selected pill with it. */
+.dismoji-mode-plain {
+    background: none;
 }
 
 .dismoji-hint {

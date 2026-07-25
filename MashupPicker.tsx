@@ -192,7 +192,9 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
             className={classes(
                 NavClasses.navButton,
                 NavClasses.navItem,
-                mode === value && NavClasses.navButtonActive
+                // The UA button background is cleared only while inactive, so the
+                // reset cannot outrank Discord's active highlight.
+                mode === value ? NavClasses.navButtonActive : "dismoji-mode-plain"
             )}
             onClick={() => { setMode(value); setLeft(null); setQuery(""); }}
         >
