@@ -246,17 +246,23 @@ matters.
 Step 5 stays manual: whether a mashup actually arrives in a channel needs a
 logged-in client, and no gate here does that for you.
 
-**It has not been performed against current code.** The last run, on 2026-07-25,
-covered both engines and the Recent row, but the client it ran against was built
-from a source copy predating the runtime-fetch change — so it exercised the
-bundled index, and a surface that no longer exists. Nothing was wrong with the
-test; the installed plugin was a detached copy that had drifted, which is exactly
-why the installation instructions say to clone.
+Last performed on 2026-07-26, against a client built from the clone at
+`b0fe997` — which differs from this file's commit only in this file, so the
+running code was the shipped code. Both engines send: Kitchen inserting its URL,
+Faces uploading its flattened image, over the fetched index.
 
-The lesson is worth keeping: a manual smoke proves whatever the client was
-actually built from, which is not necessarily what the repository says. Before
-recording one, confirm the build is current — `git -C src/userplugins/emojiMashup
-log -1` against this repository's HEAD, then rebuild.
+Not covered by that run, and so not claimed: the one-time migration of recents
+from the pre-rename storage key, and Faces remaining usable when the index fails
+to load.
+
+The check before recording one of these matters. An earlier smoke was retracted
+because the installed plugin was a detached file copy that had drifted hours
+behind the repository, so it tested a bundled index and a surface that had since
+been removed. A manual smoke proves whatever the client was actually built from,
+which is not necessarily what the repository says. Confirm the installed commit
+against this repository's HEAD, rebuild, and keep nothing but the plugin under
+`src/userplugins` — Vencord compiles every directory there, so a `.bak` beside it
+silently ships a second copy of the plugin.
 
 ## Limitations
 
