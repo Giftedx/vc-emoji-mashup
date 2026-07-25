@@ -124,7 +124,8 @@ the checkout must already have its dependencies installed.
 
 ### Regenerating the index
 
-`kitchenData.ts` is generated and committed. Rebuild it when Google ships new
+`kitchenIndex.b64` holds the packed index and `kitchenIndexMeta.ts` its
+provenance. Both are generated and committed. Rebuild them when Google ships new
 mashups (historically a few times a year):
 
 ```bash
@@ -138,6 +139,10 @@ field), and HEAD-checks 20 sampled URLs against live gstatic. Any failure aborts
 the build rather than shipping something broken. Set `METADATA_PATH` to reuse a
 local copy; its content hash is still recomputed and recorded.
 
+After committing a regenerated index, repin `INDEX_PIN` in `loadKitchen.ts` to
+that commit. `build-index` prints the reminder, and `pnpm test` fails if the
+index and its recorded digest ever drift apart.
+
 The Twemoji parts inventory for Faces mode has its own generator, pinned to an
 upstream commit so part URLs can't shift under a moving branch:
 
@@ -149,6 +154,27 @@ pnpm verify-assets   # check Kitchen, face layers, Twemoji and pinned Noto asset
 
 `verify-assets` applies a ten-second timeout to every request and also verifies
 the CORS header required to flatten the SVG face layers into a canvas safely.
+
+### Why the index is fetched, not bundled
+
+The index is downloaded on first picker open from a commit-pinned jsDelivr URL,
+and its SHA-256 is checked before it is decoded.
+
+The alternative — compiling it in, which is what this plugin used to do — costs
+every Vencord user the download whether or not they enable the plugin, because
+plugins are compiled into one bundle and enabling is a runtime switch. Measured
+against a real build, bundling added **520 KB raw / 292 KB gzipped**, more than
+doubling Vencord's renderer over the wire. Fetching costs **20 KB raw / 6 KB
+gzipped**, and only people who open the picker pay for the rest. For scale, the
+largest file anywhere in Vencord's own `src/plugins` is 40 KB.
+
+Fetching runtime data is the ordinary way to do this — `clearURLs`, `petpet`,
+`oneko`, `reactErrorDecoder` and `shikiCodeblocks` all do it, and `jsdelivr.net`
+is already in Vencord's default CSP allowlist, so no host permission is involved.
+
+The cost is honest: no network, no Kitchen grid. Faces mode is unaffected, since
+its parts inventory is 7 KB and already fetched, so the picker degrades to Faces
+rather than to nothing.
 
 ### Why the index is packed
 
@@ -232,6 +258,9 @@ tab and from the chat-bar button, plus re-sending from the Recent row.
   arbitrary images inline as emoji.
 - The Google emoji set covers 617/619 — ©️ and ®️ have no Noto asset and fall back
   to your system font.
+- **Kitchen mode needs network on first open**, since the index is fetched rather
+  than bundled. It is cached for the session, and Faces mode stays usable without
+  it.
 
 ## Credits
 

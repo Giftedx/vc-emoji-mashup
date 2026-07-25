@@ -23,6 +23,6 @@
     "verbatimModuleSyntax": true,
     "types": ["node"]
   },
-  "include": ["codec.ts", "kitchen.ts", "loadKitchen.ts", "kitchenData.ts", "emojiSets.ts", "twemojiMash.ts", "twemojiParts.ts", "test", "scripts"]
+  "include": ["codec.ts", "kitchen.ts", "loadKitchen.ts", "kitchenIndexMeta.ts", "emojiSets.ts", "twemojiMash.ts", "twemojiParts.ts", "test", "scripts"]
 }
 

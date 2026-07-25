@@ -11,8 +11,11 @@
  *   pnpm verify-assets
  */
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { emojiAssetUrls, type EmojiSet } from "../emojiSets";
-import { loadKitchen } from "../loadKitchen";
+import { buildKitchen, INDEX_URL } from "../loadKitchen";
 import { followers, leaders, partsFor } from "../twemojiMash";
 
 const TIMEOUT_MS = 10_000;
@@ -88,7 +91,15 @@ async function checkCandidateSet(set: Exclude<EmojiSet, "system">, codepoint: st
 }
 
 const checks: Check[] = [];
-const kitchen = await loadKitchen();
+
+// From disk, so this verifies the index about to ship rather than the published
+// one. The pinned URL that ships it is checked separately below.
+const kitchen = await buildKitchen(async () =>
+    readFileSync(resolve(import.meta.dirname, "..", "kitchenIndex.b64"), "utf8"));
+
+// The index is now fetched at runtime, so its pin is a runtime asset boundary
+// like any other: a bad pin means an empty Kitchen grid for everyone.
+checks.push(() => head("index:pinned", INDEX_URL));
 
 for (let i = 0; i < KITCHEN_SAMPLE; i++) {
     const emojiIndex = Math.floor(i * kitchen.emoji.length / KITCHEN_SAMPLE);

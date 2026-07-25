@@ -12,15 +12,21 @@
  * user seeing broken images.
  */
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { beforeAll, describe, expect, it } from "vitest";
 
 import type { Kitchen } from "../kitchen";
-import { loadKitchen } from "../loadKitchen";
+import { buildKitchen } from "../loadKitchen";
 
 let k: Kitchen;
 
+// Reads the committed index rather than fetching the published one: this tests
+// what is about to ship, not what already shipped.
 beforeAll(async () => {
-    k = await loadKitchen();
+    k = await buildKitchen(async () =>
+        readFileSync(resolve(import.meta.dirname, "..", "kitchenIndex.b64"), "utf8"));
 });
 
 describe("generated index", () => {

@@ -159,15 +159,6 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
         return [...groups];
     }, [kitchen]);
 
-    if (error) {
-        return <div className="vc-mashup-state">Could not load the mashup index: {error}</div>;
-    }
-    if (!kitchen) {
-        return <div className="vc-mashup-state">Loading mashups…</div>;
-    }
-
-    const k = kitchen;
-
     function choose(leftCp: string, m: Mashup) {
         const recent = { left: leftCp, right: m.partner, url: m.url };
         setRecents(current => mergeRecent(current, recent));
@@ -231,7 +222,8 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
 
     // ---- Generated mode: composited Twemoji faces ----
     if (mode === "generated") {
-        const nameOf = (cp: string) => k.nameOf(cp) || cp;
+        // Faces needs the index only for labels, so it stays usable without one.
+        const nameOf = (cp: string) => kitchen?.nameOf(cp) || cp;
 
         if (left === null) {
             const list = leaders().filter(cp => !query || nameOf(cp).toLowerCase().includes(query.trim().toLowerCase()));
@@ -323,6 +315,28 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
             </div>
         );
     }
+
+    // Everything below needs the index, which is fetched rather than bundled.
+    // The mode switch stays rendered so a failed fetch leaves Faces reachable
+    // instead of stranding the user on an error with no way out.
+    if (error) {
+        return (
+            <div className="vc-mashup-root">
+                {modeSwitch}
+                <div className="vc-mashup-state">Could not load the mashup index: {error}</div>
+            </div>
+        );
+    }
+    if (!kitchen) {
+        return (
+            <div className="vc-mashup-root">
+                {modeSwitch}
+                <div className="vc-mashup-state">Loading mashups…</div>
+            </div>
+        );
+    }
+
+    const k = kitchen;
 
     // ---- Stage 1: choose the left emoji ----
     if (left === null) {

@@ -1,3 +1,6 @@
 * text=auto eol=lf
-kitchenData.ts linguist-generated=true
+kitchenIndexMeta.ts linguist-generated=true
 twemojiParts.ts linguist-generated=true
+
+# Generated payload, not source.
+kitchenIndex.b64 linguist-generated=true
