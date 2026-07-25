@@ -242,7 +242,9 @@ Step 5 stays manual: whether a mashup actually arrives in a channel needs a
 logged-in client, and no gate here does that for you. It was last performed on
 2026-07-25 against build 582977, covering both engines on both surfaces —
 Kitchen sending its URL and Faces uploading its flattened image, from the picker
-tab and from the chat-bar button, plus re-sending from the Recent row.
+tab and from the chat-bar button, plus re-sending from the Recent row. Kitchen
+mode was re-checked after the index moved to a runtime fetch, since that changed
+how it loads.
 
 ## Limitations
 
