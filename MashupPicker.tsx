@@ -1,4 +1,4 @@
-import { React, ScrollerThin, useEffect, useMemo, useState } from "@webpack/common";
+import { React, ScrollerThin, Select, TextInput, useEffect, useMemo, useState } from "@webpack/common";
 
 import { type EmojiSet, emojiAssetUrls } from "./emojiSets";
 import { type Kitchen, type Mashup, toEmojiChar } from "./kitchen";
@@ -32,6 +32,17 @@ const GSTATIC = "https://www.gstatic.com";
 
 /** Sentinel for the "every category" option in the category dropdown. */
 const ALL = "\0all";
+
+/**
+ * Matches the leading icon in Discord's own search bars — passing it as
+ * TextInput's `prefixElement` is what produces their `hasLeading` layout.
+ */
+const SearchIcon = () => (
+    <svg className="dismoji-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2" />
+        <path d="M15.5 15.5 L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+);
 
 interface Props {
     onPick(url: string): void;
@@ -156,22 +167,31 @@ export function MashupPicker({ onPick }: Props) {
             <div className="dismoji-root">
                 {notice}
                 <div className="dismoji-controls">
-                    <input
-                        className="dismoji-search"
-                        placeholder="Search emoji…"
-                        value={query}
-                        onChange={e => setQuery(e.currentTarget.value)}
-                    />
-                    <select
-                        className="dismoji-category"
-                        value={category}
-                        onChange={e => setCategory(e.currentTarget.value)}
-                    >
-                        <option value={ALL}>All categories</option>
-                        {grouped.map(([name, cps]) => (
-                            <option key={name} value={name}>{name} ({cps.length})</option>
-                        ))}
-                    </select>
+                    <div className="dismoji-search">
+                        <TextInput
+                            value={query}
+                            onChange={setQuery}
+                            placeholder="Search emoji…"
+                            prefixElement={<SearchIcon />}
+                        />
+                    </div>
+                    <div className="dismoji-category">
+                        <Select
+                            options={[
+                                { label: "All categories", value: ALL },
+                                ...grouped.map(([name, cps]) => ({
+                                    label: `${name} (${cps.length})`,
+                                    value: name
+                                }))
+                            ]}
+                            placeholder="All categories"
+                            maxVisibleItems={10}
+                            closeOnSelect={true}
+                            select={v => setCategory(v)}
+                            isSelected={v => v === category}
+                            serialize={String}
+                        />
+                    </div>
                 </div>
 
                 {recents.length > 0 && !query && category === ALL && (
@@ -227,12 +247,16 @@ export function MashupPicker({ onPick }: Props) {
                 <span className="dismoji-count">{k.nameOf(left)} — {all.length} mashups</span>
             </div>
 
-            <input
-                className="dismoji-search"
-                placeholder="Filter partners…"
-                value={query}
-                onChange={e => setQuery(e.currentTarget.value)}
-            />
+            <div className="dismoji-controls">
+                <div className="dismoji-search">
+                    <TextInput
+                        value={query}
+                        onChange={setQuery}
+                        placeholder="Filter partners…"
+                        prefixElement={<SearchIcon />}
+                    />
+                </div>
+            </div>
 
             <ScrollerThin className="dismoji-scroller" fade>
                 {partners.length === 0
