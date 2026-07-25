@@ -1,21 +1,29 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [master, main]
   pull_request:
+  # Weekly, because upstream drift happens while nothing is being pushed —
+  # this is what makes the upstream job below an actual early warning.
+  schedule:
+    - cron: "0 6 * * 1"
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 11
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: pnpm
@@ -28,25 +36,69 @@ jobs:
       - name: Test
         run: pnpm test
 
-  # The plugin depends on two upstream asset sources that can move without
-  # warning. This does not gate merges — it opens a signal that the bundled
-  # index or the pinned parts revision needs regenerating.
-  upstream:
+  host:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out plugin
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: plugin
 
-      - uses: pnpm/action-setup@v4
+      - name: Check out current Vencord
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Vendicated/Vencord
+          path: vencord
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 11
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: vencord/pnpm-lock.yaml
+
+      - name: Install Vencord dependencies
+        working-directory: vencord
+        run: pnpm install --frozen-lockfile
+
+      - name: Install exact plugin tree
+        run: |
+          mkdir -p vencord/src/userplugins/emojiMashup
+          git -C plugin archive --format=tar HEAD | tar -C vencord/src/userplugins/emojiMashup -xf -
+
+      - name: Build inside Vencord
+        working-directory: vencord
+        run: pnpm build
+
+      - name: Typecheck inside Vencord
+        working-directory: vencord
+        run: pnpm testTsc
+
+      - name: Lint plugin with Vencord
+        working-directory: vencord
+        run: pnpm exec eslint "src/userplugins/emojiMashup/**/*.{ts,tsx,mts}"
+
+  # External asset drift is a release failure even when no source has changed.
+  upstream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Twemoji part URLs still resolve
-        run: pnpm verify-parts
+      - name: External runtime assets still resolve
+        run: pnpm verify-assets
