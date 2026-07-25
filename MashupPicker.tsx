@@ -1,4 +1,4 @@
-import { React, useEffect, useMemo, useState } from "@webpack/common";
+import { React, ScrollerThin, useEffect, useMemo, useState } from "@webpack/common";
 
 import { type EmojiSet, emojiAssetUrls } from "./emojiSets";
 import { type Kitchen, type Mashup, toEmojiChar } from "./kitchen";
@@ -192,18 +192,20 @@ export function MashupPicker({ onPick }: Props) {
                     </>
                 )}
 
-                {visible.length === 0
-                    ? <div className="dismoji-state">No emoji match “{query}”.</div>
-                    : query || category !== ALL
-                        // Flat grid: the category labels would be redundant once
-                        // the list is already scoped by the dropdown or a search.
-                        ? <div className="dismoji-grid">{visible.map(emojiCell)}</div>
-                        : grouped.map(([name, codepoints]) => (
-                            <React.Fragment key={name}>
-                                <div className="dismoji-label">{name}</div>
-                                <div className="dismoji-grid">{codepoints.map(emojiCell)}</div>
-                            </React.Fragment>
-                        ))}
+                <ScrollerThin className="dismoji-scroller" fade>
+                    {visible.length === 0
+                        ? <div className="dismoji-state">No emoji match “{query}”.</div>
+                        : query || category !== ALL
+                            // Flat grid: the category labels would be redundant once
+                            // the list is already scoped by the dropdown or a search.
+                            ? <div className="dismoji-grid">{visible.map(emojiCell)}</div>
+                            : grouped.map(([name, codepoints]) => (
+                                <React.Fragment key={name}>
+                                    <div className="dismoji-label">{name}</div>
+                                    <div className="dismoji-grid">{codepoints.map(emojiCell)}</div>
+                                </React.Fragment>
+                            ))}
+                </ScrollerThin>
             </div>
         );
     }
@@ -232,22 +234,24 @@ export function MashupPicker({ onPick }: Props) {
                 onChange={e => setQuery(e.currentTarget.value)}
             />
 
-            {partners.length === 0
-                ? <div className="dismoji-state">Nothing matches “{query}”.</div>
-                : (
-                    <div className="dismoji-grid">
-                        {partners.map(m => (
-                            <button
-                                key={m.partner}
-                                className="dismoji-cell"
-                                title={`${k.nameOf(left!)} + ${m.name}`}
-                                onClick={() => choose(left!, m)}
-                            >
-                                {thumbnail(m.url, m.name, left!, m.partner)}
-                            </button>
-                        ))}
-                    </div>
-                )}
+            <ScrollerThin className="dismoji-scroller" fade>
+                {partners.length === 0
+                    ? <div className="dismoji-state">Nothing matches “{query}”.</div>
+                    : (
+                        <div className="dismoji-grid">
+                            {partners.map(m => (
+                                <button
+                                    key={m.partner}
+                                    className="dismoji-cell"
+                                    title={`${k.nameOf(left!)} + ${m.name}`}
+                                    onClick={() => choose(left!, m)}
+                                >
+                                    {thumbnail(m.url, m.name, left!, m.partner)}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+            </ScrollerThin>
         </div>
     );
 }
