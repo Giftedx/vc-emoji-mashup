@@ -50,7 +50,7 @@ describe("google (noto)", () => {
 
     it("uses underscore-joined emoji_u filenames", () => {
         expect(url("1f600")).toEqual([
-            "https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/png/128/emoji_u1f600.png"
+            "https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@8998f5dd683424a73e2314a8c1f1e359c19e8742/png/128/emoji_u1f600.png"
         ]);
     });
 

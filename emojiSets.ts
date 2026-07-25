@@ -18,7 +18,7 @@
 export type EmojiSet = "system" | "twitter" | "google";
 
 const TWEMOJI = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/72x72";
-const NOTO = "https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/png/128";
+const NOTO = "https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@8998f5dd683424a73e2314a8c1f1e359c19e8742/png/128";
 
 /**
  * Ordered candidate URLs for a codepoint, best first. Consumers try each in
