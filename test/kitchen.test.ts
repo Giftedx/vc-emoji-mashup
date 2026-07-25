@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { RawIndex } from "../src/codec";
-import { buildUrl, createKitchen, toUrlSegment } from "../src/kitchen";
+import type { RawIndex } from "../codec";
+import { buildUrl, createKitchen, toEmojiChar, toUrlSegment } from "../kitchen";
 
 const raw: RawIndex = {
     emoji: ["2615", "263a-fe0f", "1f62e-200d-1f4a8"],
@@ -34,6 +34,24 @@ describe("toUrlSegment", () => {
         // The naive `u${codepoint}` form matched only 75.9% of real pairs
         // and 404'd on the other 24.1%. Guard against regressing to it.
         expect(toUrlSegment("2708-fe0f")).not.toBe("u2708-fe0f");
+    });
+});
+
+describe("toEmojiChar", () => {
+    it("renders a single-codepoint emoji", () => {
+        expect(toEmojiChar("2615")).toBe("☕");
+    });
+
+    it("renders a variation-selector sequence", () => {
+        expect(toEmojiChar("263a-fe0f")).toBe("☺️");
+    });
+
+    it("renders a ZWJ sequence as one grapheme", () => {
+        expect(toEmojiChar("1f62e-200d-1f4a8")).toBe("\u{1f62e}‍\u{1f4a8}");
+    });
+
+    it("renders an astral-plane emoji correctly", () => {
+        expect(toEmojiChar("1f600")).toBe("😀");
     });
 });
 

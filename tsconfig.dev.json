@@ -1,0 +1,24 @@
+{
+  // Deliberately NOT named tsconfig.json.
+  //
+  // This repo is cloned directly into Vencord/src/userplugins/, so a file named
+  // tsconfig.json here would shadow Vencord's when esbuild walks up from each
+  // source file — and Vencord's is where the @api/*, @utils/*, @webpack/* path
+  // aliases are defined. A shadowing tsconfig breaks the build with
+  // "Could not resolve @api/ChatButtons". Verified, not theorised.
+  //
+  // Scope is the Vencord-independent code only. Files importing Vencord aliases
+  // cannot resolve here; Vencord's own build typechecks those.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "types": ["node"]
+  },
+  "include": ["codec.ts", "kitchen.ts", "loadKitchen.ts", "kitchenData.ts", "test", "scripts"]
+}

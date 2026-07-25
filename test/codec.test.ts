@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { decodeIndex, encodeIndex, type RawIndex } from "../src/codec";
+import { decodeIndex, encodeIndex, type RawIndex } from "../codec";
 
 const sample: RawIndex = {
     emoji: ["2615", "263a-fe0f", "1f62e-200d-1f4a8"],

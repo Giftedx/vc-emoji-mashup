@@ -42,6 +42,20 @@ export function buildUrl(date: string, left: string, right: string): string {
     return `${BASE}/${date}/${l}/${l}_${toUrlSegment(right)}.png`;
 }
 
+/**
+ * Converts a dataset codepoint into the actual emoji character:
+ *   "2615"             -> "☕"
+ *   "263a-fe0f"        -> "☺️"
+ *   "1f62e-200d-1f4a8" -> "😮‍💨"
+ *
+ * Stage 1 renders these as text rather than images. Discord exposes no
+ * addressable image URL for unicode emoji (IconUtils.getEmojiURL covers custom
+ * emoji only), and text costs no network request and no CSP allowance.
+ */
+export function toEmojiChar(codepoint: string): string {
+    return String.fromCodePoint(...codepoint.split("-").map(c => Number.parseInt(c, 16)));
+}
+
 export function createKitchen(raw: RawIndex): Kitchen {
     const indexOf = new Map<string, number>();
     for (let i = 0; i < raw.emoji.length; i++) indexOf.set(raw.emoji[i], i);

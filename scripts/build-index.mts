@@ -14,12 +14,12 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
-import { encodeIndex, type PairRecord, type RawIndex } from "../src/codec";
-import { createKitchen } from "../src/kitchen";
+import { encodeIndex, type PairRecord, type RawIndex } from "../codec";
+import { createKitchen } from "../kitchen";
 
 const SOURCE = "https://raw.githubusercontent.com/xsalazar/emoji-kitchen-backend/main/app/metadata.json";
 const CACHE = process.env.METADATA_PATH ?? "metadata.json";
-const OUT = "src/kitchenData.ts";
+const OUT = "kitchenData.ts";
 
 const EXPECTED_EMOJI = 619;
 const MIN_PAIRS = 140_000;

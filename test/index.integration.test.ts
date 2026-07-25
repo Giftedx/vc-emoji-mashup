@@ -8,8 +8,8 @@
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import type { Kitchen } from "../src/kitchen";
-import { loadKitchen } from "../src/loadKitchen";
+import type { Kitchen } from "../kitchen";
+import { loadKitchen } from "../loadKitchen";
 
 let k: Kitchen;
 
