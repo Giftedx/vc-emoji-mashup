@@ -113,6 +113,18 @@ requires a raw webpack patch matching Discord's *minified* picker component.
 running client, and it is what breaks when Discord reships their bundle. No
 upstream plugin adds a picker tab, so there is no in-tree precedent to copy.
 
+**Spike findings (2026-07-25, Discord build 582977):** Vencord dev build injected
+and confirmed running; `Vencord.Plugins.plugins.EmojiMashup` is present, so the
+build and bundling pipeline works end to end. The store module carrying
+`expression-picker-last-active-view` is id `151271` — that is state, not the tab
+renderer, so the tab-strip component is still being located.
+
+A failed patch logs `Patch by <plugin> had no effect` and undoes its whole patch
+group (`src/webpack/patchWebpack.ts:572-579`), so a stale match string degrades to
+"no tab" rather than corrupting the picker. Because the chat-bar button is
+registered unconditionally, no failure-detection code is needed — the fallback is
+simply always present.
+
 Mitigation: the picker view is mount-agnostic, and `index.tsx` mounts it two ways
 — the tab patch (primary) and a `ChatButtons` chat-bar button (fallback). Vencord
 reports patch-application failures, so the plugin can detect the break and
