@@ -115,9 +115,22 @@ upstream plugin adds a picker tab, so there is no in-tree precedent to copy.
 
 **Spike findings (2026-07-25, Discord build 582977):** Vencord dev build injected
 and confirmed running; `Vencord.Plugins.plugins.EmojiMashup` is present, so the
-build and bundling pipeline works end to end. The store module carrying
-`expression-picker-last-active-view` is id `151271` — that is state, not the tab
-renderer, so the tab-strip component is still being located.
+build and bundling pipeline works end to end.
+
+Module search results (`Vencord.Webpack.search`, all filters AND-ed —
+`src/webpack/webpack.ts:800`):
+
+| Filter | Modules |
+|---|---|
+| `expression-picker-last-active-view` | `151271` — the state store, not a renderer |
+| `activeView` + `soundboard` | **`731231`** — sole hit, the view renderer |
+| `soundboard` + `sticker` + `gif` | 18 — too broad to use |
+| `expression-picker-tab` | 0 — name not used by Discord |
+| `ExpressionPickerNavItem` | 0 — name not used by Discord |
+| `setExpressionPickerView` | 0 — mangled in the bundle |
+
+`731231` is the patch target. The last three rows are recorded because negative
+results are worth keeping: they are guesses that should not be retried.
 
 A failed patch logs `Patch by <plugin> had no effect` and undoes its whole patch
 group (`src/webpack/patchWebpack.ts:572-579`), so a stale match string degrades to
