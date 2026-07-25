@@ -128,6 +128,16 @@
     flex: 0 0 auto;
 }
 
+/* Recent is pinned above the scroller so it does not scroll away, which also
+   means it misses the 8px inset .vc-mashup-scroller gives its contents. Without
+   this it sits flush left while every category heading below is indented.
+   The child combinator picks out the pinned label only: the category labels are
+   nested inside the scroller, and Recent's fragment adds no element of its own. */
+.vc-mashup-root > .vc-mashup-label,
+.vc-mashup-recents {
+    padding-inline: 8px;
+}
+
 .vc-mashup-cell {
     padding: 2px;
     border: none;
