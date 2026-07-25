@@ -212,8 +212,11 @@ The patch was last verified against Discord build **582977**, module
 promise: Discord can replace the minified module at any time, at which point
 this job goes red and the chat-bar fallback keeps working.
 
-Step 5 stays manual. Verifying the tab renders and a mashup sends needs a
-logged-in client, which no gate here does for you.
+Step 5 stays manual: whether a mashup actually arrives in a channel needs a
+logged-in client, and no gate here does that for you. It was last performed on
+2026-07-25 against build 582977, covering both engines on both surfaces —
+Kitchen sending its URL and Faces uploading its flattened image, from the picker
+tab and from the chat-bar button, plus re-sending from the Recent row.
 
 ## Limitations
 
