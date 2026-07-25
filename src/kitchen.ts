@@ -47,11 +47,15 @@ export function createKitchen(raw: RawIndex): Kitchen {
     for (let i = 0; i < raw.emoji.length; i++) indexOf.set(raw.emoji[i], i);
 
     // adjacency[i] = indices into raw.pairs of every pair touching emoji i.
+    //
+    // Self-pairs (coffee + coffee) are real in this dataset and have lo === hi.
+    // Pushing such a pair twice would duplicate it in partnersOf — a doubled cell
+    // and a duplicate React key — so it is pushed once.
     const adjacency: number[][] = Array.from({ length: raw.emoji.length }, () => []);
     for (let i = 0; i < raw.pairs.length; i++) {
         const p = raw.pairs[i];
         adjacency[p.lo].push(i);
-        adjacency[p.hi].push(i);
+        if (p.hi !== p.lo) adjacency[p.hi].push(i);
     }
 
     function urlOfPair(pairIndex: number): string {

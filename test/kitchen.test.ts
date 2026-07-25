@@ -117,3 +117,36 @@ describe("kitchen", () => {
         expect(k.search("hot,d")).toEqual([]);
     });
 });
+
+describe("self-pairs", () => {
+    // Emoji Kitchen genuinely contains self-mashups (coffee + coffee), stored
+    // with lo === hi. They must appear exactly once, not twice.
+    const selfRaw: RawIndex = {
+        emoji: ["2615", "263a-fe0f"],
+        names: ["coffee\thot\tfood & drink\tdrink", "smile\thappy\tsmileys\tface"],
+        dates: ["20201001"],
+        pairs: [
+            { lo: 0, hi: 0, dateIndex: 0, loIsUrlLeft: true },
+            { lo: 0, hi: 1, dateIndex: 0, loIsUrlLeft: true }
+        ]
+    };
+    const sk = createKitchen(selfRaw);
+
+    it("lists a self-pair exactly once", () => {
+        expect(sk.partnersOf("2615").filter(m => m.partner === "2615")).toHaveLength(1);
+    });
+
+    it("lists the self-pair alongside ordinary partners", () => {
+        expect(sk.partnersOf("2615").map(m => m.partner)).toEqual(["2615", "263a-fe0f"]);
+    });
+
+    it("builds a self-pair URL with the emoji on both sides", () => {
+        expect(sk.urlFor("2615", "2615"))
+            .toBe("https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u2615/u2615_u2615.png");
+    });
+
+    it("produces no duplicate partner keys", () => {
+        const partners = sk.partnersOf("2615").map(m => m.partner);
+        expect(new Set(partners).size).toBe(partners.length);
+    });
+});

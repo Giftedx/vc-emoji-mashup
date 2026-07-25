@@ -59,7 +59,9 @@ a trust checkbox (`src/main/csp/manager.ts:71`). Do **not** use the undocumented
 - 147,000 unique latest pairs (293,586 directed records; each pair appears under both emoji)
 - 43 distinct release dates, most recent `20260128`
 - ~475 partners per emoji on average
-- Trimmed index: 718 KB raw, **346 KB gzipped**
+- Trimmed index, as actually built: 783 KB packed, **375 KB gzipped**, 500 KB base64.
+  (An earlier figure of 346 KB gzipped covered only the pair array and omitted the
+  emoji/name/date tables.)
 
 **URL rule** — verified against all 293,586 records (100% match) and live HTTP:
 
@@ -148,7 +150,7 @@ fails the build loudly instead of shipping broken.
 
 Vencord builds with esbuild into a single bundle, so the index ships as a
 gzipped-base64 string constant, decompressed at runtime via
-`DecompressionStream("gzip")`. Cost: **~462 KB of source text** added to the
+`DecompressionStream("gzip")`. Cost: **500 KB of source text** added to the
 Vencord bundle. This is the honest price of the bundling decision.
 
 If that becomes a problem, the known lever is encoding pair existence as an
