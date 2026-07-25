@@ -20,7 +20,9 @@ import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const suppliedVencord = process.argv[2] ?? process.env.VENCORD_PATH;
+// pnpm forwards the `--` separator itself on Linux but eats it on Windows, so
+// the path is not reliably argv[2]. Take the first argument that is not it.
+const suppliedVencord = process.argv.slice(2).find(arg => arg !== "--") ?? process.env.VENCORD_PATH;
 
 if (!suppliedVencord) {
     throw new Error("Pass a Vencord checkout path as an argument or set VENCORD_PATH");
