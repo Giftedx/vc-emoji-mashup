@@ -23,6 +23,29 @@ server-side, so recipients see the image.
 - **Emoji sets** — render the picker in Twitter, Google or your system emoji style
 - Also available as a chat-bar button, which keeps working if the tab patch ever breaks
 
+### Two mashup engines
+
+The picker has a **Kitchen / Faces** switch, because there are two genuinely
+different ways to mash emoji together.
+
+**Kitchen** is Google's Emoji Kitchen: 147,000 combinations across 619 emoji,
+*hand-drawn* by Google's designers. Objects, animals, food, faces. Sent as a URL
+that Discord embeds.
+
+**Faces** is the [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot)
+lineage: mashups *composited at runtime* from cut-up Twemoji — a base shape, one
+emoji's eyes, another's mouth. 135 × 128 combinations, and order matters, so
+swapping the two gives a different face. Faces only, since a coffee cup has no
+eyes to borrow. These are generated in your client, so they upload as an image
+attachment rather than a link.
+
+Google's are more polished; Twemoji's cover pairings Google never drew, and are
+what the original bot did before Emoji Kitchen existed.
+
+> There is no Microsoft Fluent equivalent here. Emojipedia hosts one, but nobody
+> publishes the cut-up Fluent parts needed to build it, and cutting them by hand
+> is an art task rather than a coding one.
+
 ## Installation
 
 Follow the official guide for
@@ -97,6 +120,14 @@ asserts invariants (619 emoji, at least 140k pairs, dates fitting the 7-bit fiel
 and HEAD-checks 20 sampled URLs against live gstatic. Any failure aborts the build
 rather than shipping something broken. Set `METADATA_PATH` to reuse a local copy.
 
+The Twemoji parts inventory for Faces mode has its own generator, pinned to an
+upstream commit so part URLs can't shift under a moving branch:
+
+```bash
+pnpm build-parts     # regenerate twemojiParts.ts
+pnpm verify-parts    # confirm sampled layer URLs still resolve
+```
+
 ### Why the index is packed
 
 The upstream metadata is ~94 MB of JSON, almost all of it derivable. Every asset URL
@@ -130,8 +161,11 @@ are written against.
 - Emoji Kitchen covers **619 emoji**, not the full Unicode set, and only the pairs
   Google actually drew. There is no algorithm generating these.
 - **Custom server emoji can't be mashed up** — Google has no artwork for them.
-- **Mashups themselves can't be restyled.** The emoji-set setting changes the emoji
-  you pick from, not the combinations, which are always Google's artwork.
+- **Kitchen mashups can't be restyled.** The emoji-set setting changes the emoji you
+  pick from, not the combinations — those are always Google's artwork. Faces mode is
+  the Twemoji-styled alternative, but it generates rather than restyles, and covers
+  only faces.
+- **No Microsoft Fluent mashups.** No public library of cut-up Fluent parts exists.
 - Mashups send as a URL, not as a real emoji. Discord has no mechanism for sending
   arbitrary images inline as emoji.
 - The Google emoji set covers 617/619 — ©️ and ®️ have no Noto asset and fall back
@@ -139,11 +173,16 @@ are written against.
 
 ## Credits
 
-Mashup artwork © Google, from [Emoji Kitchen](https://emojikitchen.dev).
+Kitchen mashup artwork © Google, from [Emoji Kitchen](https://emojikitchen.dev).
 Pair metadata from [xsalazar/emoji-kitchen](https://github.com/xsalazar/emoji-kitchen).
+Images are hot-linked from Google's CDN and never redistributed; the bundled index
+holds only factual pair data — which combinations exist and when they shipped.
 
-Images are hot-linked from Google's CDN and never redistributed. The bundled index
-holds only factual pair data: which combinations exist and when they shipped.
+Faces mode uses cut-up Twemoji parts from
+[Ryhon0/open-emoji-mash](https://github.com/Ryhon0/open-emoji-mash) (GPL-3.0),
+fetched from jsDelivr at a pinned commit. Twemoji artwork © Twitter, CC-BY 4.0.
+The technique comes from Louan Bengmah's
+[Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot).
 
 ## Licence
 
