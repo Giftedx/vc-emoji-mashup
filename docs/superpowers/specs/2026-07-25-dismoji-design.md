@@ -132,6 +132,20 @@ Module search results (`Vencord.Webpack.search`, all filters AND-ed —
 `731231` is the patch target. The last three rows are recorded because negative
 results are worth keeping: they are guesses that should not be retried.
 
+**Outcome: the tab works.** Three replacements against `731231`, each verified to
+match exactly once by running the regexes offline against the real minified source
+before shipping. Module-local values (tab component, view enum, active-view
+variable, jsx factory) are captured through the regexes because plugin code cannot
+reference them. See `index.tsx` for the patch.
+
+**UI components.** The picker uses Discord's own `TextInput` (with
+`prefixElement`, which produces their `hasLeading` search-bar layout), `Select`,
+and `ScrollerThin` rather than CSS imitations. This was settled by dumping the
+live DOM — `control > container > wrapper(md, hasLeading) > input`, with
+build-specific hashes like `__0f084` that must never be hardcoded. Probing webpack
+for class names (`searchBar`, `searchBox`, `searchInput`) found nothing; the
+rendered DOM was the ground truth and should have been the first stop.
+
 A failed patch logs `Patch by <plugin> had no effect` and undoes its whole patch
 group (`src/webpack/patchWebpack.ts:572-579`), so a stale match string degrades to
 "no tab" rather than corrupting the picker. Because the chat-bar button is
