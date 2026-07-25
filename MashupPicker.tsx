@@ -16,6 +16,11 @@ interface Props {
  *
  * Knows nothing about how it is mounted — the same component backs both the
  * expression-picker tab and the chat-bar modal fallback.
+ *
+ * Cells NEVER hide themselves when an image fails. Previews are blocked by CSP
+ * until the user grants gstatic, and a hide-on-error policy empties the whole
+ * grid in that state, leaving nothing to click. Failed images fall back to the
+ * emoji characters instead, so picking always works.
  */
 export function MashupPicker({ onPick }: Props) {
     const [kitchen, setKitchen] = useState<Kitchen | null>(null);
@@ -24,6 +29,7 @@ export function MashupPicker({ onPick }: Props) {
     const [query, setQuery] = useState("");
     const [recents, setRecents] = useState<Recent[]>([]);
     const [previewsAllowed, setPreviewsAllowed] = useState<boolean | null>(null);
+    const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
 
     useEffect(() => {
         loadKitchen().then(setKitchen, e => setError(String(e)));
@@ -36,10 +42,8 @@ export function MashupPicker({ onPick }: Props) {
         if (result === "ok") setPreviewsAllowed(true);
     }
 
-    async function choose(leftCp: string, m: Mashup) {
-        await pushRecent({ left: leftCp, right: m.partner, url: m.url });
-        setRecents(await getRecents());
-        onPick(m.url);
+    function markFailed(url: string) {
+        setFailed(prev => (prev.has(url) ? prev : new Set(prev).add(url)));
     }
 
     const grouped = useMemo(() => {
@@ -61,11 +65,31 @@ export function MashupPicker({ onPick }: Props) {
         return <div className="dismoji-state">Loading mashups…</div>;
     }
 
+    const k = kitchen;
+
+    async function choose(leftCp: string, m: Mashup) {
+        await pushRecent({ left: leftCp, right: m.partner, url: m.url });
+        setRecents(await getRecents());
+        onPick(m.url);
+    }
+
+    /**
+     * A mashup thumbnail that degrades to text rather than vanishing.
+     * `fallback` is what the cell shows when the image cannot be displayed.
+     */
+    function thumbnail(url: string, alt: string, fallback: string) {
+        if (previewsAllowed === false || failed.has(url)) {
+            return <span className="dismoji-cell-fallback">{fallback}</span>;
+        }
+        return <img src={url} alt={alt} loading="lazy" onError={() => markFailed(url)} />;
+    }
+
     const notice = previewsAllowed === false && (
         <div className="dismoji-notice">
             <div>
-                Previews are blocked. Mashups still send correctly — Discord fetches
-                the image server-side, so everyone else sees it.
+                Previews are blocked, so combinations show as plain emoji below. Picking
+                and sending still work — Discord fetches the image server-side, so
+                everyone else sees the real mashup.
             </div>
             <button className="dismoji-allow" onClick={requestPreviews}>Allow previews</button>
             <small>Requires restarting Discord after allowing.</small>
@@ -78,7 +102,7 @@ export function MashupPicker({ onPick }: Props) {
             <button
                 key={cp}
                 className="dismoji-cell dismoji-cell-text"
-                title={kitchen.nameOf(cp)}
+                title={k.nameOf(cp)}
                 onClick={() => { setLeft(cp); setQuery(""); }}
             >
                 {toEmojiChar(cp)}
@@ -100,13 +124,13 @@ export function MashupPicker({ onPick }: Props) {
                         <div className="dismoji-label">Recent</div>
                         <div className="dismoji-grid dismoji-recents">
                             {recents.map(r => (
-                                <button key={r.url} className="dismoji-cell" onClick={() => onPick(r.url)}>
-                                    <img
-                                        src={r.url}
-                                        alt=""
-                                        loading="lazy"
-                                        onError={e => hideCell(e.currentTarget)}
-                                    />
+                                <button
+                                    key={r.url}
+                                    className="dismoji-cell"
+                                    title={`${k.nameOf(r.left)} + ${k.nameOf(r.right)}`}
+                                    onClick={() => onPick(r.url)}
+                                >
+                                    {thumbnail(r.url, "", toEmojiChar(r.left) + toEmojiChar(r.right))}
                                 </button>
                             ))}
                         </div>
@@ -114,7 +138,7 @@ export function MashupPicker({ onPick }: Props) {
                 )}
 
                 {query
-                    ? <div className="dismoji-grid">{kitchen.search(query).map(emojiCell)}</div>
+                    ? <div className="dismoji-grid">{k.search(query).map(emojiCell)}</div>
                     : grouped.map(([category, codepoints]) => (
                         <React.Fragment key={category}>
                             <div className="dismoji-label">{category}</div>
@@ -126,7 +150,7 @@ export function MashupPicker({ onPick }: Props) {
     }
 
     // ---- Stage 2: choose the partner ----
-    const all = kitchen.partnersOf(left);
+    const all = k.partnersOf(left);
     const partners = query
         ? all.filter(m => m.name.toLowerCase().includes(query.trim().toLowerCase()))
         : all;
@@ -139,7 +163,7 @@ export function MashupPicker({ onPick }: Props) {
                     ‹ Back
                 </button>
                 <span className="dismoji-chosen">{toEmojiChar(left)}</span>
-                <span className="dismoji-count">{kitchen.nameOf(left)} — {all.length} mashups</span>
+                <span className="dismoji-count">{k.nameOf(left)} — {all.length} mashups</span>
             </div>
 
             <input
@@ -149,24 +173,22 @@ export function MashupPicker({ onPick }: Props) {
                 onChange={e => setQuery(e.currentTarget.value)}
             />
 
-            <div className="dismoji-grid">
-                {partners.map(m => (
-                    <button
-                        key={m.partner}
-                        className="dismoji-cell"
-                        title={`${kitchen.nameOf(left)} + ${m.name}`}
-                        onClick={() => choose(left, m)}
-                    >
-                        <img src={m.url} alt={m.name} loading="lazy" onError={e => hideCell(e.currentTarget)} />
-                    </button>
-                ))}
-            </div>
+            {partners.length === 0
+                ? <div className="dismoji-state">Nothing matches “{query}”.</div>
+                : (
+                    <div className="dismoji-grid">
+                        {partners.map(m => (
+                            <button
+                                key={m.partner}
+                                className="dismoji-cell"
+                                title={`${k.nameOf(left!)} + ${m.name}`}
+                                onClick={() => choose(left!, m)}
+                            >
+                                {thumbnail(m.url, m.name, toEmojiChar(left!) + toEmojiChar(m.partner))}
+                            </button>
+                        ))}
+                    </div>
+                )}
         </div>
     );
-}
-
-/** A pair can be in the index but missing from gstatic; drop that cell silently. */
-function hideCell(img: HTMLImageElement) {
-    const cell = img.closest("button");
-    if (cell instanceof HTMLElement) cell.style.display = "none";
 }

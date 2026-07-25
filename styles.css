@@ -67,6 +67,19 @@
     text-align: center;
 }
 
+/* Shown when a mashup image cannot load — CSP not yet granted, or a missing
+   asset. Two emoji side by side, scaled down to fit the cell. */
+.dismoji-cell-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1;
+    font-size: 15px;
+    letter-spacing: -2px;
+    white-space: nowrap;
+}
+
 .dismoji-header {
     display: flex;
     align-items: center;
