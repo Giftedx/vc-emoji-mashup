@@ -10,11 +10,22 @@ import { ChatBarButton, type ChatBarButtonFactory } from "@api/ChatButtons";
 import { copyWithToast, insertTextIntoChatInputBox } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ExpressionPickerStore, Text } from "@webpack/common";
+import {
+    ChannelStore,
+    DraftType,
+    ExpressionPickerStore,
+    SelectedChannelStore,
+    Text,
+    Toasts,
+    UploadHandler
+} from "@webpack/common";
 
+import { renderMashup } from "./mashRenderer";
 import { MashupPicker } from "./MashupPicker";
 import { settings } from "./settings";
+import type { MashParts } from "./twemojiMash";
 
+/** Emoji Kitchen mashups are hosted images, so sending is just a URL. */
 function handlePick(url: string) {
     if (settings.store.sendMode === "copy") {
         copyWithToast(url, "Mashup URL copied!");
@@ -23,6 +34,40 @@ function handlePick(url: string) {
     }
 
     if (settings.store.autoClose) ExpressionPickerStore.closeExpressionPicker();
+}
+
+/**
+ * Generated mashups exist only in the client, so they have no URL to insert —
+ * they have to be flattened and uploaded as an attachment instead.
+ */
+async function handleGeneratedPick(parts: MashParts, name: string) {
+    const channelId = SelectedChannelStore.getChannelId();
+    const channel = channelId && ChannelStore.getChannel(channelId);
+
+    if (!channel) {
+        Toasts.show({
+            message: "No channel to send to",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE
+        });
+        return;
+    }
+
+    try {
+        const file = await renderMashup(parts, name);
+        if (settings.store.autoClose) ExpressionPickerStore.closeExpressionPicker();
+
+        // Deferred so the picker has finished closing before Discord's upload
+        // tray appears — the same reason petpet defers its own upload.
+        setTimeout(() => UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage), 10);
+    } catch (err) {
+        console.error("[EmojiMashup] render failed", err);
+        Toasts.show({
+            message: "Could not build that mashup",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE
+        });
+    }
 }
 
 const MashupIcon = () => (
@@ -45,6 +90,10 @@ function openMashupModal() {
                 <MashupPicker
                     onPick={url => {
                         handlePick(url);
+                        props.onClose();
+                    }}
+                    onPickGenerated={(parts, name) => {
+                        handleGeneratedPick(parts, name);
                         props.onClose();
                     }}
                 />
@@ -74,7 +123,7 @@ export default definePlugin({
     VIEW: "mashup",
 
     /** Rendered inside the expression picker when our tab is active. */
-    PickerPanel: () => <MashupPicker onPick={handlePick} />,
+    PickerPanel: () => <MashupPicker onPick={handlePick} onPickGenerated={handleGeneratedPick} />,
 
     // Adds a "Mashup" tab to Discord's expression picker.
     //

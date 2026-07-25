@@ -11,6 +11,7 @@ import { type Kitchen, type Mashup, toEmojiChar } from "./kitchen";
 import { loadKitchen } from "./loadKitchen";
 import { getRecents, pushRecent, type Recent } from "./recents";
 import { settings } from "./settings";
+import { followers, leaders, type MashParts, partsFor } from "./twemojiMash";
 
 /**
  * A single emoji rendered in the chosen set, walking its candidate URLs and
@@ -51,7 +52,26 @@ const SearchIcon = () => (
 );
 
 interface Props {
+    /** Emoji Kitchen pick — a hosted image URL. */
     onPick(url: string): void;
+    /** Generated pick — layers to flatten and upload. */
+    onPickGenerated(parts: MashParts, name: string): void;
+}
+
+type Mode = "kitchen" | "generated";
+
+/**
+ * A generated mashup preview: three SVG layers stacked. The browser composites
+ * them and lazy-loads as you scroll, so no canvas work happens until send.
+ */
+function GeneratedPreview({ parts }: { parts: MashParts; }) {
+    return (
+        <span className="dismoji-layers">
+            <img src={parts.base} alt="" loading="lazy" />
+            <img src={parts.eyes} alt="" loading="lazy" />
+            <img src={parts.mouth} alt="" loading="lazy" />
+        </span>
+    );
 }
 
 /**
@@ -66,7 +86,7 @@ interface Props {
  * grid in that state, leaving nothing to click. Failed images fall back to the
  * emoji characters instead, so picking always works.
  */
-export function MashupPicker({ onPick }: Props) {
+export function MashupPicker({ onPick, onPickGenerated }: Props) {
     const [kitchen, setKitchen] = useState<Kitchen | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [left, setLeft] = useState<string | null>(null);
@@ -75,6 +95,7 @@ export function MashupPicker({ onPick }: Props) {
     const [previewsAllowed, setPreviewsAllowed] = useState<boolean | null>(null);
     const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
     const [category, setCategory] = useState(ALL);
+    const [mode, setMode] = useState<Mode>("kitchen");
 
     // Must sit with the other hooks, above every early return.
     const emojiSet = settings.use(["emojiSet"]).emojiSet as EmojiSet;
@@ -138,7 +159,9 @@ export function MashupPicker({ onPick }: Props) {
         return <img src={url} alt={alt} loading="lazy" onError={() => markFailed(url)} />;
     }
 
-    const notice = previewsAllowed === false && (
+    // Only Emoji Kitchen images come from gstatic; generated parts are on
+    // jsDelivr, which Vencord already allows. So the notice is mode-specific.
+    const notice = mode === "kitchen" && previewsAllowed === false && (
         <div className="dismoji-notice">
             <div>
                 Previews are blocked, so combinations show as plain emoji below. Picking
@@ -149,6 +172,120 @@ export function MashupPicker({ onPick }: Props) {
             <small>Requires restarting Discord after allowing.</small>
         </div>
     );
+
+    const modeSwitch = (
+        <div className="dismoji-modes" role="tablist">
+            <button
+                role="tab"
+                aria-selected={mode === "kitchen"}
+                className={"dismoji-mode" + (mode === "kitchen" ? " dismoji-mode-active" : "")}
+                onClick={() => { setMode("kitchen"); setLeft(null); setQuery(""); }}
+            >
+                Kitchen
+            </button>
+            <button
+                role="tab"
+                aria-selected={mode === "generated"}
+                className={"dismoji-mode" + (mode === "generated" ? " dismoji-mode-active" : "")}
+                onClick={() => { setMode("generated"); setLeft(null); setQuery(""); }}
+            >
+                Faces
+            </button>
+        </div>
+    );
+
+    // ---- Generated mode: composited Twemoji faces ----
+    if (mode === "generated") {
+        const nameOf = (cp: string) => k.nameOf(cp) || cp;
+
+        if (left === null) {
+            const list = leaders().filter(cp => !query || nameOf(cp).toLowerCase().includes(query.trim().toLowerCase()));
+
+            return (
+                <div className="dismoji-root">
+                    {modeSwitch}
+                    <div className="dismoji-controls">
+                        <div className="dismoji-search">
+                            <TextInput
+                                value={query}
+                                onChange={setQuery}
+                                placeholder="Search faces…"
+                                prefixElement={<SearchIcon />}
+                            />
+                        </div>
+                    </div>
+                    <div className="dismoji-hint">
+                        Built from Twemoji parts — pick a face for the eyes, then one for the mouth.
+                    </div>
+                    <ScrollerThin className="dismoji-scroller" fade>
+                        {list.length === 0
+                            ? <div className="dismoji-state">No faces match “{query}”.</div>
+                            : (
+                                <div className="dismoji-grid">
+                                    {list.map(cp => (
+                                        <button
+                                            key={cp}
+                                            className="dismoji-cell dismoji-cell-text"
+                                            title={nameOf(cp)}
+                                            onClick={() => { setLeft(cp); setQuery(""); }}
+                                        >
+                                            <SetEmoji codepoint={cp} set={emojiSet} />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                    </ScrollerThin>
+                </div>
+            );
+        }
+
+        const follows = followers().filter(cp => !query || nameOf(cp).toLowerCase().includes(query.trim().toLowerCase()));
+
+        return (
+            <div className="dismoji-root">
+                {modeSwitch}
+                <div className="dismoji-header">
+                    <button className="dismoji-back" onClick={() => { setLeft(null); setQuery(""); }}>
+                        ‹ Back
+                    </button>
+                    <span className="dismoji-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
+                    <span className="dismoji-count">{nameOf(left)} — {follows.length} mouths</span>
+                </div>
+                <div className="dismoji-controls">
+                    <div className="dismoji-search">
+                        <TextInput
+                            value={query}
+                            onChange={setQuery}
+                            placeholder="Filter mouths…"
+                            prefixElement={<SearchIcon />}
+                        />
+                    </div>
+                </div>
+                <ScrollerThin className="dismoji-scroller" fade>
+                    {follows.length === 0
+                        ? <div className="dismoji-state">Nothing matches “{query}”.</div>
+                        : (
+                            <div className="dismoji-grid">
+                                {follows.map(cp => {
+                                    const parts = partsFor(left!, cp);
+                                    if (!parts) return null;
+                                    return (
+                                        <button
+                                            key={cp}
+                                            className="dismoji-cell"
+                                            title={`${nameOf(left!)} + ${nameOf(cp)}`}
+                                            onClick={() => onPickGenerated(parts, `${left}-${cp}`)}
+                                        >
+                                            <GeneratedPreview parts={parts} />
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                </ScrollerThin>
+            </div>
+        );
+    }
 
     // ---- Stage 1: choose the left emoji ----
     if (left === null) {
@@ -171,6 +308,7 @@ export function MashupPicker({ onPick }: Props) {
 
         return (
             <div className="dismoji-root">
+                {modeSwitch}
                 {notice}
                 <div className="dismoji-controls">
                     <div className="dismoji-search">
@@ -244,6 +382,7 @@ export function MashupPicker({ onPick }: Props) {
 
     return (
         <div className="dismoji-root">
+            {modeSwitch}
             {notice}
             <div className="dismoji-header">
                 <button className="dismoji-back" onClick={() => { setLeft(null); setQuery(""); }}>
