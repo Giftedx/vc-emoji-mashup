@@ -16,34 +16,13 @@
     padding: 0 8px 8px;
 }
 
+/* The buttons themselves wear Discord's own nav classes, so this is layout only
+   — never appearance. Styling them here would be imitating what we can inherit. */
 .dismoji-modes {
     display: flex;
     flex: 0 0 auto;
-    gap: 4px;
-    margin-bottom: 8px;
-    padding: 0 8px;
-}
-
-.dismoji-mode {
-    padding: 4px 12px;
-    border: none;
-    border-radius: 4px;
-    background: none;
-    color: var(--interactive-normal);
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.dismoji-mode:hover {
-    background: var(--background-modifier-hover);
-    color: var(--interactive-hover);
-}
-
-.dismoji-mode-active,
-.dismoji-mode-active:hover {
-    background: var(--background-modifier-selected);
-    color: var(--interactive-active);
+    margin-bottom: 4px;
+    padding: 0 4px;
 }
 
 .dismoji-hint {

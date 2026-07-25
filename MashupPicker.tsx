@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classes } from "@utils/misc";
+import { findCssClassesLazy } from "@webpack";
 import { React, ScrollerThin, Select, TextInput, useEffect, useMemo, useState } from "@webpack/common";
 
 import { emojiAssetUrls,type EmojiSet } from "./emojiSets";
@@ -36,6 +38,16 @@ function SetEmoji({ codepoint, set }: { codepoint: string; set: EmojiSet; }) {
 }
 
 const GSTATIC = "https://www.gstatic.com";
+
+/**
+ * Discord's own expression-picker tab classes, so the Kitchen/Faces switch is
+ * styled by them rather than imitated. Looked up by unhashed key because the
+ * rendered names carry a build-specific suffix (navButton__08434 today).
+ *
+ * findCssClasses returns {} rather than throwing if the lookup ever fails, so
+ * the buttons stay usable — just unstyled — instead of the picker breaking.
+ */
+const NavClasses = findCssClassesLazy("navButton", "navItem", "navButtonActive");
 
 /** Sentinel for the "every category" option in the category dropdown. */
 const ALL = "\0all";
@@ -173,24 +185,25 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
         </div>
     );
 
+    const modeButton = (value: Mode, label: string) => (
+        <button
+            role="tab"
+            aria-selected={mode === value}
+            className={classes(
+                NavClasses.navButton,
+                NavClasses.navItem,
+                mode === value && NavClasses.navButtonActive
+            )}
+            onClick={() => { setMode(value); setLeft(null); setQuery(""); }}
+        >
+            {label}
+        </button>
+    );
+
     const modeSwitch = (
         <div className="dismoji-modes" role="tablist">
-            <button
-                role="tab"
-                aria-selected={mode === "kitchen"}
-                className={"dismoji-mode" + (mode === "kitchen" ? " dismoji-mode-active" : "")}
-                onClick={() => { setMode("kitchen"); setLeft(null); setQuery(""); }}
-            >
-                Kitchen
-            </button>
-            <button
-                role="tab"
-                aria-selected={mode === "generated"}
-                className={"dismoji-mode" + (mode === "generated" ? " dismoji-mode-active" : "")}
-                onClick={() => { setMode("generated"); setLeft(null); setQuery(""); }}
-            >
-                Faces
-            </button>
+            {modeButton("kitchen", "Kitchen")}
+            {modeButton("generated", "Faces")}
         </div>
     );
 

@@ -99,7 +99,9 @@ export const HAS_MOUTH: ReadonlySet<string> = new Set(${JSON.stringify(mouth)});
 export const HAS_OWN_BASE: ReadonlySet<string> = new Set(${JSON.stringify(base)});
 
 /** Codepoint -> shared base name, for emoji without their own base. */
-export const SHARED_BASE: Readonly<Record<string, string>> = ${JSON.stringify(bases)};
+// Indented so the object spans lines: Vencord's object-curly-spacing rule
+// requires padding inside single-line braces, and multi-line objects are exempt.
+export const SHARED_BASE: Readonly<Record<string, string>> = ${JSON.stringify(bases, null, 4)};
 `);
 
 console.log(`eyes=${eyes.length} mouth=${mouth.length} base=${base.length}`);
