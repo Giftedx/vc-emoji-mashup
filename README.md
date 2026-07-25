@@ -24,7 +24,6 @@ server-side, so recipients see the image.
 - **Search and category filter** over all 619 supported emoji
 - **Recent** row remembering your last 24 Emoji Kitchen mashups
 - **Emoji sets** — render the picker in Twitter, Google or your system emoji style
-- Also available as a chat-bar button, which keeps working if the tab patch ever breaks
 
 ### Two mashup engines
 
@@ -64,10 +63,10 @@ pnpm build && pnpm inject
 
 Then restart Discord and enable **EmojiMashup** in Vencord settings.
 
-> **Clone it, don't symlink it.** esbuild resolves Vencord's `@api/*` and `@utils/*`
-> aliases from the nearest `tsconfig.json` above each source file. A symlink or
-> junction resolves outside Vencord's tree and breaks the build with
-> `Could not resolve "@api/ChatButtons"`. The dev config here is named
+> **Clone it, don't symlink it.** esbuild resolves Vencord's `@utils/*` and
+> `@webpack/*` aliases from the nearest `tsconfig.json` above each source file. A
+> symlink or junction resolves outside Vencord's tree and breaks the build with
+> `Could not resolve "@utils/discord"`. The dev config here is named
 > `tsconfig.dev.json` for the same reason — a `tsconfig.json` beside `index.tsx`
 > would shadow Vencord's.
 
@@ -192,8 +191,13 @@ matches only 75.9% of pairs and 404s on the rest. Tests pin this.
 
 The tab is a webpack patch against Discord's minified expression picker, so it will
 eventually break when Discord reships their bundle. When it does, Vencord logs
-`Patch by EmojiMashup had no effect` and undoes the patch group — the picker is left
-untouched and the chat-bar button keeps working.
+`Patch by EmojiMashup had no effect` and undoes the patch group, leaving Discord's
+picker untouched.
+
+The tab is the only surface, so that also leaves the plugin inert until the patch
+is re-derived. That is the deliberate trade for not crowding the chat bar with a
+second button, and it is why `verify-patches` runs weekly against Discord's live
+bundle rather than only on push: the warning should arrive before a user notices.
 
 To re-derive the target module, run this in the Discord console:
 
@@ -212,7 +216,7 @@ The deterministic release gate is:
 2. build, typecheck and lint inside current Vencord;
 3. live asset verification;
 4. the patch applying to Discord's live bundle; and
-5. a real Discord smoke of the picker tab and chat-bar fallback.
+5. a real Discord smoke of the picker tab.
 
 Step 4 is `pnpm verify-patches`, and it runs in CI on every push and weekly:
 
@@ -235,16 +239,16 @@ to read.
 
 The patch was last verified against Discord build **582977**, module
 **731231**. Treat that as evidence of the last verification, not a compatibility
-promise: Discord can replace the minified module at any time, at which point
-this job goes red and the chat-bar fallback keeps working.
+promise: Discord can replace the minified module at any time, at which point this
+job goes red — and since the tab is the only surface, that is the warning that
+matters.
 
 Step 5 stays manual: whether a mashup actually arrives in a channel needs a
 logged-in client, and no gate here does that for you. It was last performed on
-2026-07-25 against build 582977, covering both engines on both surfaces —
-Kitchen sending its URL and Faces uploading its flattened image, from the picker
-tab and from the chat-bar button, plus re-sending from the Recent row. Kitchen
-mode was re-checked after the index moved to a runtime fetch, since that changed
-how it loads.
+2026-07-25 against build 582977, covering both engines — Kitchen sending its URL
+and Faces uploading its flattened image — plus re-sending from the Recent row.
+Kitchen mode was re-checked after the index moved to a runtime fetch, since that
+changed how it loads.
 
 ## Limitations
 

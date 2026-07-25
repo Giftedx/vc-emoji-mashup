@@ -6,15 +6,12 @@
 
 import "./styles.css";
 
-import { ChatBarButton, type ChatBarButtonFactory } from "@api/ChatButtons";
 import { copyWithToast, insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
 import {
     ChannelStore,
     DraftType,
     ExpressionPickerStore,
-    Modal,
-    openModal,
     SelectedChannelStore,
     Toasts,
     UploadHandler
@@ -70,43 +67,6 @@ async function handleGeneratedPick(parts: MashParts, name: string) {
     }
 }
 
-const MashupIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
-        <circle cx="8.5" cy="9.5" r="1.5" />
-        <circle cx="15.5" cy="9.5" r="1.5" />
-        <path d="M7.5 13.5a4.5 4.5 0 0 0 9 0h-9Z" />
-    </svg>
-);
-
-/** Fallback surface, used when the picker-tab patch is absent or fails to apply. */
-function openMashupModal() {
-    openModal(props => (
-        <Modal {...props} size="md" title="Emoji Mashup">
-            <MashupPicker
-                onPick={url => {
-                    handlePick(url);
-                    if (settings.store.autoClose) props.onClose();
-                }}
-                onPickGenerated={(parts, name) => {
-                    void handleGeneratedPick(parts, name);
-                    if (settings.store.autoClose) props.onClose();
-                }}
-            />
-        </Modal>
-    ));
-}
-
-const MashupChatBarButton: ChatBarButtonFactory = ({ isMainChat }) => {
-    if (!isMainChat) return null;
-
-    return (
-        <ChatBarButton tooltip="Emoji Mashup" onClick={openMashupModal}>
-            <MashupIcon />
-        </ChatBarButton>
-    );
-};
-
 export default definePlugin({
     name: "EmojiMashup",
     description: "Adds a Mashup tab to the emoji picker: Google's Emoji Kitchen combinations, plus generated Twemoji face mashups",
@@ -134,7 +94,9 @@ export default definePlugin({
     //
     // If Discord reships and a match stops applying, Vencord logs
     // "Patch by EmojiMashup had no effect" and undoes the group, leaving the
-    // picker untouched. The chat-bar button below keeps working regardless.
+    // picker untouched — and the tab is the only surface, so the plugin is then
+    // inert until the patch is re-derived. `pnpm verify-patches` runs weekly in
+    // CI against Discord's live bundle so that surfaces before a user hits it.
     patches: [{
         find: 'analyticsSource:"expression-picker"',
         replacement: [
@@ -155,10 +117,5 @@ export default definePlugin({
                 replace: "$1,$2===$self.VIEW?(0,$3.jsx)($self.PickerPanel,{}):null"
             }
         ]
-    }],
-
-    chatBarButton: {
-        icon: MashupIcon,
-        render: MashupChatBarButton
-    }
+    }]
 });

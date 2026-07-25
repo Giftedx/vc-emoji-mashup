@@ -93,8 +93,8 @@ function GeneratedPreview({ parts }: { parts: MashParts; }) {
  * Two-stage picker. Stage 1 lists the 619 supported emoji; stage 2 lists the
  * chosen emoji's ~475 partners, each cell rendering the real mashup image.
  *
- * Knows nothing about how it is mounted — the same component backs both the
- * expression-picker tab and the chat-bar modal fallback.
+ * Knows nothing about how it is mounted: it reports picks through callbacks and
+ * leaves sending to the caller.
  *
  * Cells NEVER hide themselves when an image fails. Previews are blocked by CSP
  * until the user grants gstatic, and a hide-on-error policy empties the whole
