@@ -1,0 +1,26 @@
+{
+  "name": "dismoji",
+  "version": "0.1.0",
+  "description": "Emoji Kitchen mashup tab for Discord, as a Vencord userplugin",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build-index": "tsx scripts/build-index.mts"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.13.0",
+      "onFail": "download"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
