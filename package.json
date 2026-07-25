@@ -12,7 +12,8 @@
     "build-parts": "tsx scripts/build-parts.mts",
     "verify-parts": "tsx scripts/verify-parts.mts",
     "verify-assets": "tsx scripts/verify-assets.mts",
-    "verify-host-layout": "tsx scripts/verify-host-layout.mts"
+    "verify-host-layout": "tsx scripts/verify-host-layout.mts",
+    "verify-patches": "tsx scripts/verify-patches.mts"
   },
   "devEngines": {
     "packageManager": {

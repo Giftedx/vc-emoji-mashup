@@ -82,6 +82,49 @@ jobs:
         working-directory: vencord
         run: pnpm exec eslint "src/userplugins/emojiMashup/**/*.{ts,tsx,mts}"
 
+  # The picker tab is a patch against Discord's minified bundle, so it breaks
+  # when Discord reships it — silently, and with nothing in this repository
+  # changing. This loads Discord's real bundle logged out and asserts all three
+  # replacements still land. Nothing signs in and nothing is sent.
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out plugin
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: plugin
+
+      - name: Check out current Vencord
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Vendicated/Vencord
+          path: vencord
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: vencord/pnpm-lock.yaml
+
+      - name: Install Vencord dependencies
+        working-directory: vencord
+        run: pnpm install --frozen-lockfile
+
+      - name: Install plugin dependencies
+        working-directory: plugin
+        run: pnpm install --frozen-lockfile
+
+      - name: Patch still applies to Discord's live bundle
+        working-directory: plugin
+        env:
+          CHROMIUM_BIN: /usr/bin/google-chrome
+        run: pnpm verify-patches -- ../vencord
+
   # External asset drift is a release failure even when no source has changed.
   upstream:
     runs-on: ubuntu-latest

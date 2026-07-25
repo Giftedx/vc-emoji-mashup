@@ -97,6 +97,7 @@ pnpm test        # unit tests plus integration tests against the real index
 pnpm typecheck
 pnpm verify-assets
 pnpm verify-host-layout -- C:\path\to\Vencord
+pnpm verify-patches -- C:\path\to\Vencord
 ```
 
 If pnpm aborts with `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` (it wants to
@@ -183,12 +184,36 @@ The deterministic release gate is:
 
 1. this repository's tests and typecheck;
 2. build, typecheck and lint inside current Vencord;
-3. live asset verification; and
-4. a real Discord smoke of both the patched tab and chat-bar fallback.
+3. live asset verification;
+4. the patch applying to Discord's live bundle; and
+5. a real Discord smoke of the picker tab and chat-bar fallback.
 
-The patch was last derived against Discord build **582977**. Treat that number as
-evidence of the last derivation, not a compatibility promise: Discord can replace
-the minified module at any time, while the chat-bar fallback remains independent.
+Step 4 is `pnpm verify-patches`, and it runs in CI on every push and weekly:
+
+```bash
+pnpm verify-patches -- C:\path\to\Vencord
+```
+
+It builds Vencord's reporter bundle with this plugin inside a throwaway
+worktree, opens `discord.com/login` under headless Chromium, and asserts the
+expression-picker module was patched by EmojiMashup with all three replacements
+present in the patched source. **Nothing signs in and nothing is sent** — the
+patch applies while Discord's webpack modules load, which happens on the login
+page, so no account is involved.
+
+Two details make it a real check rather than a reassuring one. It asserts the
+patched source *positively*, because a plugin that never compiled in also never
+reports a failure. And it builds with `--dev`, because Vencord only records a
+factory's patched source when `IS_DEV` — without it the evidence does not exist
+to read.
+
+The patch was last verified against Discord build **582977**, module
+**731231**. Treat that as evidence of the last verification, not a compatibility
+promise: Discord can replace the minified module at any time, at which point
+this job goes red and the chat-bar fallback keeps working.
+
+Step 5 stays manual. Verifying the tab renders and a mashup sends needs a
+logged-in client, which no gate here does for you.
 
 ## Limitations
 
