@@ -16,7 +16,7 @@ import { INDEX_SHA256 } from "./kitchenIndexMeta";
  * build-index prints a reminder, and the digest check below fails loudly if the
  * pin and the expected digest ever disagree.
  */
-const INDEX_PIN = "INDEX_PIN_PLACEHOLDER";
+const INDEX_PIN = "08e156d61fe0e301d54a059c9045e3aea7cc3dfc";
 
 /**
  * jsDelivr rather than raw.githubusercontent, matching how this plugin already
