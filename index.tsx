@@ -8,14 +8,14 @@ import "./styles.css";
 
 import { ChatBarButton, type ChatBarButtonFactory } from "@api/ChatButtons";
 import { copyWithToast, insertTextIntoChatInputBox } from "@utils/discord";
-import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import {
     ChannelStore,
     DraftType,
     ExpressionPickerStore,
+    Modal,
+    openModal,
     SelectedChannelStore,
-    Text,
     Toasts,
     UploadHandler
 } from "@webpack/common";
@@ -82,23 +82,18 @@ const MashupIcon = () => (
 /** Fallback surface, used when the picker-tab patch is absent or fails to apply. */
 function openMashupModal() {
     openModal(props => (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold">Emoji Mashup</Text>
-            </ModalHeader>
-            <ModalContent>
-                <MashupPicker
-                    onPick={url => {
-                        handlePick(url);
-                        props.onClose();
-                    }}
-                    onPickGenerated={(parts, name) => {
-                        handleGeneratedPick(parts, name);
-                        props.onClose();
-                    }}
-                />
-            </ModalContent>
-        </ModalRoot>
+        <Modal {...props} size="md" title="Emoji Mashup">
+            <MashupPicker
+                onPick={url => {
+                    handlePick(url);
+                    if (settings.store.autoClose) props.onClose();
+                }}
+                onPickGenerated={(parts, name) => {
+                    void handleGeneratedPick(parts, name);
+                    if (settings.store.autoClose) props.onClose();
+                }}
+            />
+        </Modal>
     ));
 }
 
@@ -115,7 +110,7 @@ const MashupChatBarButton: ChatBarButtonFactory = ({ isMainChat }) => {
 export default definePlugin({
     name: "EmojiMashup",
     description: "Adds a Mashup tab to the emoji picker: Google's Emoji Kitchen combinations, plus generated Twemoji face mashups",
-    tags: ["Emoji", "Chat"],
+    tags: ["Emotes", "Chat"],
     authors: [{ name: "Giftedx", id: 258276274726895617n }],
     settings,
 

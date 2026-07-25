@@ -57,13 +57,13 @@ const MAX_DATES = 128; // dateIndex occupies 7 bits
 
 export function encodeIndex(raw: RawIndex): Uint8Array {
     if (raw.emoji.length !== raw.names.length) {
-        throw new Error(`dismoji: emoji (${raw.emoji.length}) and names (${raw.names.length}) must be parallel`);
+        throw new Error(`EmojiMashup: emoji (${raw.emoji.length}) and names (${raw.names.length}) must be parallel`);
     }
     if (raw.dates.length > MAX_DATES) {
-        throw new Error(`dismoji: ${raw.dates.length} dates exceeds the ${MAX_DATES}-entry limit of the 7-bit date index`);
+        throw new Error(`EmojiMashup: ${raw.dates.length} dates exceeds the ${MAX_DATES}-entry limit of the 7-bit date index`);
     }
     if (raw.dates.some(d => d.length !== 8)) {
-        throw new Error("dismoji: every date must be exactly 8 characters (YYYYMMDD)");
+        throw new Error("EmojiMashup: every date must be exactly 8 characters (YYYYMMDD)");
     }
 
     const enc = new TextEncoder();
@@ -71,10 +71,10 @@ export function encodeIndex(raw: RawIndex): Uint8Array {
     const nameBytes = raw.names.map(n => enc.encode(n));
 
     for (const b of emojiBytes) {
-        if (b.length > 0xff) throw new Error("dismoji: codepoint string exceeds 255 bytes");
+        if (b.length > 0xff) throw new Error("EmojiMashup: codepoint string exceeds 255 bytes");
     }
     for (const b of nameBytes) {
-        if (b.length > 0xffff) throw new Error("dismoji: name entry exceeds 65535 bytes");
+        if (b.length > 0xffff) throw new Error("EmojiMashup: name entry exceeds 65535 bytes");
     }
 
     let size = 4 + 1 + 2 + 1 + 4;
@@ -106,7 +106,7 @@ export function encodeIndex(raw: RawIndex): Uint8Array {
     }
     for (const p of raw.pairs) {
         if (p.dateIndex < 0 || p.dateIndex >= MAX_DATES) {
-            throw new Error(`dismoji: date index ${p.dateIndex} does not fit in 7 bits`);
+            throw new Error(`EmojiMashup: date index ${p.dateIndex} does not fit in 7 bits`);
         }
         view.setUint16(o, p.lo, true); o += 2;
         view.setUint16(o, p.hi, true); o += 2;
@@ -122,13 +122,13 @@ export function decodeIndex(bytes: Uint8Array): RawIndex {
     let o = 0;
 
     if (view.getUint32(o, true) !== MAGIC) {
-        throw new Error("dismoji: bad magic number — not a dismoji index");
+        throw new Error("EmojiMashup: bad magic number — not a packed kitchen index");
     }
     o += 4;
 
     const version = view.getUint8(o); o += 1;
     if (version !== VERSION) {
-        throw new Error(`dismoji: unsupported index version ${version}, expected ${VERSION}`);
+        throw new Error(`EmojiMashup: unsupported index version ${version}, expected ${VERSION}`);
     }
 
     const emojiCount = view.getUint16(o, true); o += 2;

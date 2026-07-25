@@ -1,6 +1,6 @@
 /* Scrolling is delegated to Discord's own ScrollerThin so the scrollbar is
    theirs, not a CSS imitation. The root must therefore not scroll itself. */
-.dismoji-root {
+.vc-mashup-root {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -10,7 +10,7 @@
     padding: 8px 0 0;
 }
 
-.dismoji-scroller {
+.vc-mashup-scroller {
     flex: 1 1 auto;
     min-height: 0;
     padding: 0 8px 8px;
@@ -18,7 +18,7 @@
 
 /* The buttons wear Discord's own nav classes, so this is layout only — never
    appearance. Styling them here would imitate what we can inherit. */
-.dismoji-modes {
+.vc-mashup-modes {
     display: flex;
     flex: 0 0 auto;
     margin-bottom: 4px;
@@ -29,7 +29,7 @@
    class never needed this, so it doesn't provide it, and without the reset the
    UA's white buttonface shows through under their light-grey label.
    Deliberately does NOT set font-size, weight or colour — those are Discord's. */
-.dismoji-modes > [role="tab"] {
+.vc-mashup-modes > [aria-pressed] {
     appearance: none;
     border: none;
     font-family: inherit;
@@ -40,11 +40,19 @@
    rather than on every button keeps this from outranking navButtonActive,
    which is a single class and would otherwise lose the specificity contest —
    taking the selected pill with it. */
-.dismoji-mode-plain {
+.vc-mashup-mode-plain {
     background: none;
 }
 
-.dismoji-hint {
+.vc-mashup-modes > [aria-pressed]:focus-visible,
+.vc-mashup-cell:focus-visible,
+.vc-mashup-back:focus-visible,
+.vc-mashup-allow:focus-visible {
+    outline: 2px solid var(--focus-primary);
+    outline-offset: 2px;
+}
+
+.vc-mashup-hint {
     flex: 0 0 auto;
     margin-bottom: 6px;
     padding: 0 8px;
@@ -54,14 +62,14 @@
 
 /* Generated mashups are three stacked SVG layers — the browser composites them,
    so previews cost no canvas work. Canvas is only used at send time. */
-.dismoji-layers {
+.vc-mashup-layers {
     position: relative;
     display: block;
     width: 100%;
     aspect-ratio: 1;
 }
 
-.dismoji-layers img {
+.vc-mashup-layers img {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -70,7 +78,7 @@
 }
 
 /* Sits outside the scroller now, so it no longer needs sticky positioning. */
-.dismoji-controls {
+.vc-mashup-controls {
     display: flex;
     flex: 0 0 auto;
     gap: 6px;
@@ -80,23 +88,23 @@
 
 /* Both controls are Discord's own components (TextInput, Select), so these
    wrappers only handle layout — never the look of the control itself. */
-.dismoji-search {
+.vc-mashup-search {
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.dismoji-search-icon {
+.vc-mashup-search-icon {
     color: var(--text-muted);
 }
 
-.dismoji-category {
+.vc-mashup-category {
     flex: 0 0 auto;
     width: 40%;
     min-width: 130px;
     text-transform: capitalize;
 }
 
-.dismoji-label {
+.vc-mashup-label {
     margin: 6px 0 4px;
     color: var(--text-muted);
     font-size: 12px;
@@ -104,7 +112,7 @@
     text-transform: capitalize;
 }
 
-.dismoji-grid {
+.vc-mashup-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
     gap: 4px;
@@ -112,13 +120,13 @@
     flex: 0 0 auto;
 }
 
-.dismoji-recents {
+.vc-mashup-recents {
     max-height: 88px;
     overflow-y: auto;
     margin-bottom: 8px;
 }
 
-.dismoji-cell {
+.vc-mashup-cell {
     padding: 2px;
     border: none;
     border-radius: 4px;
@@ -126,17 +134,17 @@
     cursor: pointer;
 }
 
-.dismoji-cell:hover {
+.vc-mashup-cell:hover {
     background: var(--background-modifier-hover);
 }
 
-.dismoji-cell img {
+.vc-mashup-cell img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: contain;
 }
 
-.dismoji-cell-text {
+.vc-mashup-cell-text {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,7 +154,7 @@
     text-align: center;
 }
 
-.dismoji-set-img {
+.vc-mashup-set-img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: contain;
@@ -154,7 +162,7 @@
 
 /* Shown when a mashup image cannot load — CSP not yet granted, or a missing
    asset. The two source emoji side by side, in the selected set. */
-.dismoji-cell-fallback {
+.vc-mashup-cell-fallback {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -166,12 +174,12 @@
     white-space: nowrap;
 }
 
-.dismoji-cell-fallback .dismoji-set-img {
+.vc-mashup-cell-fallback .vc-mashup-set-img {
     width: 48%;
     aspect-ratio: 1;
 }
 
-.dismoji-header {
+.vc-mashup-header {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -181,7 +189,7 @@
     color: var(--text-normal);
 }
 
-.dismoji-chosen {
+.vc-mashup-chosen {
     display: inline-flex;
     align-items: center;
     width: 24px;
@@ -190,17 +198,17 @@
     line-height: 1;
 }
 
-.dismoji-chosen .dismoji-set-img {
+.vc-mashup-chosen .vc-mashup-set-img {
     width: 24px;
     height: 24px;
 }
 
-.dismoji-count {
+.vc-mashup-count {
     color: var(--text-muted);
     font-size: 13px;
 }
 
-.dismoji-back {
+.vc-mashup-back {
     border: none;
     background: none;
     color: var(--text-link);
@@ -208,13 +216,13 @@
     font-size: 14px;
 }
 
-.dismoji-state {
+.vc-mashup-state {
     padding: 16px;
     color: var(--text-muted);
     text-align: center;
 }
 
-.dismoji-notice {
+.vc-mashup-notice {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -226,11 +234,11 @@
     font-size: 13px;
 }
 
-.dismoji-notice small {
+.vc-mashup-notice small {
     color: var(--text-muted);
 }
 
-.dismoji-allow {
+.vc-mashup-allow {
     align-self: flex-start;
     padding: 4px 10px;
     border: none;

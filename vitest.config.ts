@@ -7,6 +7,11 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+    resolve: {
+        alias: {
+            "@api/DataStore": new URL("./test/fakes/dataStore.ts", import.meta.url).pathname
+        }
+    },
     test: {
         include: ["test/**/*.test.ts"]
     }

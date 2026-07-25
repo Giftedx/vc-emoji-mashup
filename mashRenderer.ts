@@ -21,7 +21,7 @@ export async function renderMashup(parts: MashParts, name: string): Promise<File
     canvas.height = SIZE;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("dismoji: could not get a 2d canvas context");
+    if (!ctx) throw new Error("EmojiMashup: could not get a 2d canvas context");
 
     // Sequential rather than parallel: draw order is the layer order, and these
     // come from the CDN cache after the preview has already loaded them.
@@ -30,7 +30,7 @@ export async function renderMashup(parts: MashParts, name: string): Promise<File
     }
 
     const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-    if (!blob) throw new Error("dismoji: canvas produced no image data");
+    if (!blob) throw new Error("EmojiMashup: canvas produced no image data");
 
     return new File([blob], `${name}.png`, { type: "image/png" });
 }
@@ -42,7 +42,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
         // and toBlob throws a security error.
         img.crossOrigin = "anonymous";
         img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error(`dismoji: failed to load layer ${url}`));
+        img.onerror = () => reject(new Error(`EmojiMashup: failed to load layer ${url}`));
         img.src = url;
     });
 }

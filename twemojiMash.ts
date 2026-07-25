@@ -9,9 +9,10 @@
  *
  * Where Emoji Kitchen is 147,000 hand-drawn images, these are composited at
  * runtime from cut-up Twemoji: a base shape, one emoji's eyes, another's mouth.
- * That is only meaningful for faces, so coverage is 135 emoji rather than 619,
- * but every ordered pair works — 135 x 135 combinations, and swapping the order
- * gives a genuinely different face.
+ * That is only meaningful for faces, so coverage is 135 usable emoji rather
+ * than 619. A pair works when the leader has eyes and a base and the follower
+ * has a mouth — 135 leaders x 128 followers — and order matters, so swapping
+ * the two gives a genuinely different face.
  *
  * Parts come from Ryhon0/open-emoji-mash (GPL-3.0), pinned to a commit.
  */

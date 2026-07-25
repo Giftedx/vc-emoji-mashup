@@ -8,10 +8,10 @@ import { classes } from "@utils/misc";
 import { findCssClassesLazy } from "@webpack";
 import { React, ScrollerThin, Select, TextInput, useEffect, useMemo, useState } from "@webpack/common";
 
-import { emojiAssetUrls,type EmojiSet } from "./emojiSets";
+import { emojiAssetUrls, type EmojiSet } from "./emojiSets";
 import { type Kitchen, type Mashup, toEmojiChar } from "./kitchen";
 import { loadKitchen } from "./loadKitchen";
-import { getRecents, pushRecent, type Recent } from "./recents";
+import { getRecents, mergeRecent, pickAndRemember, type Recent } from "./recents";
 import { settings } from "./settings";
 import { followers, leaders, type MashParts, partsFor } from "./twemojiMash";
 
@@ -21,6 +21,9 @@ import { followers, leaders, type MashParts, partsFor } from "./twemojiMash";
  */
 function SetEmoji({ codepoint, set }: { codepoint: string; set: EmojiSet; }) {
     const [attempt, setAttempt] = useState(0);
+    // A different set has different candidate URLs, so exhausted attempts from
+    // the previous one must not carry over and force the text fallback.
+    useEffect(() => setAttempt(0), [set, codepoint]);
     const urls = emojiAssetUrls(set, codepoint);
     const char = toEmojiChar(codepoint);
 
@@ -28,7 +31,7 @@ function SetEmoji({ codepoint, set }: { codepoint: string; set: EmojiSet; }) {
 
     return (
         <img
-            className="dismoji-set-img"
+            className="vc-mashup-set-img"
             src={urls[attempt]}
             alt={char}
             loading="lazy"
@@ -57,7 +60,7 @@ const ALL = "\0all";
  * TextInput's `prefixElement` is what produces their `hasLeading` layout.
  */
 const SearchIcon = () => (
-    <svg className="dismoji-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg className="vc-mashup-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2" />
         <path d="M15.5 15.5 L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
@@ -78,7 +81,7 @@ type Mode = "kitchen" | "generated";
  */
 function GeneratedPreview({ parts }: { parts: MashParts; }) {
     return (
-        <span className="dismoji-layers">
+        <span className="vc-mashup-layers">
             <img src={parts.base} alt="" loading="lazy" />
             <img src={parts.eyes} alt="" loading="lazy" />
             <img src={parts.mouth} alt="" loading="lazy" />
@@ -113,14 +116,31 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
     const emojiSet = settings.use(["emojiSet"]).emojiSet as EmojiSet;
 
     useEffect(() => {
-        loadKitchen().then(setKitchen, e => setError(String(e)));
-        getRecents().then(setRecents);
-        VencordNative.csp.isDomainAllowed(GSTATIC, ["img-src"]).then(setPreviewsAllowed);
+        let mounted = true;
+
+        loadKitchen().then(
+            value => { if (mounted) setKitchen(value); },
+            e => { if (mounted) setError(String(e)); }
+        );
+        getRecents().then(
+            value => { if (mounted) setRecents(value); },
+            e => console.error("[EmojiMashup] could not load recents", e)
+        );
+        VencordNative.csp.isDomainAllowed(GSTATIC, ["img-src"]).then(
+            value => { if (mounted) setPreviewsAllowed(value); },
+            e => console.error("[EmojiMashup] could not read preview permission", e)
+        );
+
+        return () => { mounted = false; };
     }, []);
 
     async function requestPreviews() {
-        const result = await VencordNative.csp.requestAddOverride(GSTATIC, ["img-src"], "Emoji Mashup");
-        if (result === "ok") setPreviewsAllowed(true);
+        try {
+            const result = await VencordNative.csp.requestAddOverride(GSTATIC, ["img-src"], "Emoji Mashup");
+            if (result === "ok") setPreviewsAllowed(true);
+        } catch (error) {
+            console.error("[EmojiMashup] could not request preview permission", error);
+        }
     }
 
     function markFailed(url: string) {
@@ -140,18 +160,18 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
     }, [kitchen]);
 
     if (error) {
-        return <div className="dismoji-state">Could not load the mashup index: {error}</div>;
+        return <div className="vc-mashup-state">Could not load the mashup index: {error}</div>;
     }
     if (!kitchen) {
-        return <div className="dismoji-state">Loading mashups…</div>;
+        return <div className="vc-mashup-state">Loading mashups…</div>;
     }
 
     const k = kitchen;
 
-    async function choose(leftCp: string, m: Mashup) {
-        await pushRecent({ left: leftCp, right: m.partner, url: m.url });
-        setRecents(await getRecents());
-        onPick(m.url);
+    function choose(leftCp: string, m: Mashup) {
+        const recent = { left: leftCp, right: m.partner, url: m.url };
+        setRecents(current => mergeRecent(current, recent));
+        void pickAndRemember(recent, onPick);
     }
 
     /**
@@ -162,7 +182,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
     function thumbnail(url: string, alt: string, a: string, b: string) {
         if (previewsAllowed === false || failed.has(url)) {
             return (
-                <span className="dismoji-cell-fallback">
+                <span className="vc-mashup-cell-fallback">
                     <SetEmoji codepoint={a} set={emojiSet} />
                     <SetEmoji codepoint={b} set={emojiSet} />
                 </span>
@@ -174,27 +194,27 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
     // Only Emoji Kitchen images come from gstatic; generated parts are on
     // jsDelivr, which Vencord already allows. So the notice is mode-specific.
     const notice = mode === "kitchen" && previewsAllowed === false && (
-        <div className="dismoji-notice">
+        <div className="vc-mashup-notice">
             <div>
                 Previews are blocked, so combinations show as plain emoji below. Picking
                 and sending still work — Discord fetches the image server-side, so
                 everyone else sees the real mashup.
             </div>
-            <button className="dismoji-allow" onClick={requestPreviews}>Allow previews</button>
+            <button type="button" className="vc-mashup-allow" onClick={requestPreviews}>Allow previews</button>
             <small>Requires restarting Discord after allowing.</small>
         </div>
     );
 
     const modeButton = (value: Mode, label: string) => (
         <button
-            role="tab"
-            aria-selected={mode === value}
+            type="button"
+            aria-pressed={mode === value}
             className={classes(
                 NavClasses.navButton,
                 NavClasses.navItem,
                 // The UA button background is cleared only while inactive, so the
                 // reset cannot outrank Discord's active highlight.
-                mode === value ? NavClasses.navButtonActive : "dismoji-mode-plain"
+                mode === value ? NavClasses.navButtonActive : "vc-mashup-mode-plain"
             )}
             onClick={() => { setMode(value); setLeft(null); setQuery(""); }}
         >
@@ -203,7 +223,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
     );
 
     const modeSwitch = (
-        <div className="dismoji-modes" role="tablist">
+        <div className="vc-mashup-modes" role="group" aria-label="Mashup type">
             {modeButton("kitchen", "Kitchen")}
             {modeButton("generated", "Faces")}
         </div>
@@ -217,10 +237,10 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
             const list = leaders().filter(cp => !query || nameOf(cp).toLowerCase().includes(query.trim().toLowerCase()));
 
             return (
-                <div className="dismoji-root">
+                <div className="vc-mashup-root">
                     {modeSwitch}
-                    <div className="dismoji-controls">
-                        <div className="dismoji-search">
+                    <div className="vc-mashup-controls">
+                        <div className="vc-mashup-search">
                             <TextInput
                                 value={query}
                                 onChange={setQuery}
@@ -229,18 +249,19 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                             />
                         </div>
                     </div>
-                    <div className="dismoji-hint">
+                    <div className="vc-mashup-hint">
                         Built from Twemoji parts — pick a face for the eyes, then one for the mouth.
                     </div>
-                    <ScrollerThin className="dismoji-scroller" fade>
+                    <ScrollerThin className="vc-mashup-scroller" fade>
                         {list.length === 0
-                            ? <div className="dismoji-state">No faces match “{query}”.</div>
+                            ? <div className="vc-mashup-state">No faces match “{query}”.</div>
                             : (
-                                <div className="dismoji-grid">
+                                <div className="vc-mashup-grid">
                                     {list.map(cp => (
                                         <button
+                                            type="button"
                                             key={cp}
-                                            className="dismoji-cell dismoji-cell-text"
+                                            className="vc-mashup-cell vc-mashup-cell-text"
                                             title={nameOf(cp)}
                                             onClick={() => { setLeft(cp); setQuery(""); }}
                                         >
@@ -257,17 +278,17 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
         const follows = followers().filter(cp => !query || nameOf(cp).toLowerCase().includes(query.trim().toLowerCase()));
 
         return (
-            <div className="dismoji-root">
+            <div className="vc-mashup-root">
                 {modeSwitch}
-                <div className="dismoji-header">
-                    <button className="dismoji-back" onClick={() => { setLeft(null); setQuery(""); }}>
+                <div className="vc-mashup-header">
+                    <button type="button" className="vc-mashup-back" onClick={() => { setLeft(null); setQuery(""); }}>
                         ‹ Back
                     </button>
-                    <span className="dismoji-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
-                    <span className="dismoji-count">{nameOf(left)} — {follows.length} mouths</span>
+                    <span className="vc-mashup-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
+                    <span className="vc-mashup-count">{nameOf(left)} — {follows.length} mouths</span>
                 </div>
-                <div className="dismoji-controls">
-                    <div className="dismoji-search">
+                <div className="vc-mashup-controls">
+                    <div className="vc-mashup-search">
                         <TextInput
                             value={query}
                             onChange={setQuery}
@@ -276,18 +297,19 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                         />
                     </div>
                 </div>
-                <ScrollerThin className="dismoji-scroller" fade>
+                <ScrollerThin className="vc-mashup-scroller" fade>
                     {follows.length === 0
-                        ? <div className="dismoji-state">Nothing matches “{query}”.</div>
+                        ? <div className="vc-mashup-state">Nothing matches “{query}”.</div>
                         : (
-                            <div className="dismoji-grid">
+                            <div className="vc-mashup-grid">
                                 {follows.map(cp => {
                                     const parts = partsFor(left!, cp);
                                     if (!parts) return null;
                                     return (
                                         <button
+                                            type="button"
                                             key={cp}
-                                            className="dismoji-cell"
+                                            className="vc-mashup-cell"
                                             title={`${nameOf(left!)} + ${nameOf(cp)}`}
                                             onClick={() => onPickGenerated(parts, `${left}-${cp}`)}
                                         >
@@ -306,8 +328,9 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
     if (left === null) {
         const emojiCell = (cp: string) => (
             <button
+                type="button"
                 key={cp}
-                className="dismoji-cell dismoji-cell-text"
+                className="vc-mashup-cell vc-mashup-cell-text"
                 title={k.nameOf(cp)}
                 onClick={() => { setLeft(cp); setQuery(""); }}
             >
@@ -322,11 +345,11 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
             : base.filter(cp => (k.categoryOf(cp) || "other") === category);
 
         return (
-            <div className="dismoji-root">
+            <div className="vc-mashup-root">
                 {modeSwitch}
                 {notice}
-                <div className="dismoji-controls">
-                    <div className="dismoji-search">
+                <div className="vc-mashup-controls">
+                    <div className="vc-mashup-search">
                         <TextInput
                             value={query}
                             onChange={setQuery}
@@ -334,7 +357,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                             prefixElement={<SearchIcon />}
                         />
                     </div>
-                    <div className="dismoji-category">
+                    <div className="vc-mashup-category">
                         <Select
                             options={[
                                 { label: "All categories", value: ALL },
@@ -355,14 +378,19 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
 
                 {recents.length > 0 && !query && category === ALL && (
                     <>
-                        <div className="dismoji-label">Recent</div>
-                        <div className="dismoji-grid dismoji-recents">
+                        <div className="vc-mashup-label">Recent</div>
+                        <div className="vc-mashup-grid vc-mashup-recents">
                             {recents.map(r => (
                                 <button
+                                    type="button"
                                     key={r.url}
-                                    className="dismoji-cell"
+                                    className="vc-mashup-cell"
                                     title={`${k.nameOf(r.left)} + ${k.nameOf(r.right)}`}
-                                    onClick={() => onPick(r.url)}
+                                    onClick={() => choose(r.left, {
+                                        partner: r.right,
+                                        url: r.url,
+                                        name: k.nameOf(r.right)
+                                    })}
                                 >
                                     {thumbnail(r.url, "", r.left, r.right)}
                                 </button>
@@ -371,17 +399,17 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                     </>
                 )}
 
-                <ScrollerThin className="dismoji-scroller" fade>
+                <ScrollerThin className="vc-mashup-scroller" fade>
                     {visible.length === 0
-                        ? <div className="dismoji-state">No emoji match “{query}”.</div>
+                        ? <div className="vc-mashup-state">No emoji match “{query}”.</div>
                         : query || category !== ALL
                             // Flat grid: the category labels would be redundant once
                             // the list is already scoped by the dropdown or a search.
-                            ? <div className="dismoji-grid">{visible.map(emojiCell)}</div>
+                            ? <div className="vc-mashup-grid">{visible.map(emojiCell)}</div>
                             : grouped.map(([name, codepoints]) => (
                                 <React.Fragment key={name}>
-                                    <div className="dismoji-label">{name}</div>
-                                    <div className="dismoji-grid">{codepoints.map(emojiCell)}</div>
+                                    <div className="vc-mashup-label">{name}</div>
+                                    <div className="vc-mashup-grid">{codepoints.map(emojiCell)}</div>
                                 </React.Fragment>
                             ))}
                 </ScrollerThin>
@@ -396,19 +424,19 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
         : all;
 
     return (
-        <div className="dismoji-root">
+        <div className="vc-mashup-root">
             {modeSwitch}
             {notice}
-            <div className="dismoji-header">
-                <button className="dismoji-back" onClick={() => { setLeft(null); setQuery(""); }}>
+            <div className="vc-mashup-header">
+                <button type="button" className="vc-mashup-back" onClick={() => { setLeft(null); setQuery(""); }}>
                     ‹ Back
                 </button>
-                <span className="dismoji-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
-                <span className="dismoji-count">{k.nameOf(left)} — {all.length} mashups</span>
+                <span className="vc-mashup-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
+                <span className="vc-mashup-count">{k.nameOf(left)} — {all.length} mashups</span>
             </div>
 
-            <div className="dismoji-controls">
-                <div className="dismoji-search">
+            <div className="vc-mashup-controls">
+                <div className="vc-mashup-search">
                     <TextInput
                         value={query}
                         onChange={setQuery}
@@ -418,15 +446,16 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                 </div>
             </div>
 
-            <ScrollerThin className="dismoji-scroller" fade>
+            <ScrollerThin className="vc-mashup-scroller" fade>
                 {partners.length === 0
-                    ? <div className="dismoji-state">Nothing matches “{query}”.</div>
+                    ? <div className="vc-mashup-state">Nothing matches “{query}”.</div>
                     : (
-                        <div className="dismoji-grid">
+                        <div className="vc-mashup-grid">
                             {partners.map(m => (
                                 <button
+                                    type="button"
                                     key={m.partner}
-                                    className="dismoji-cell"
+                                    className="vc-mashup-cell"
                                     title={`${k.nameOf(left!)} + ${m.name}`}
                                     onClick={() => choose(left!, m)}
                                 >
