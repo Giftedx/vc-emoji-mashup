@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Giftedx
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { decodeIndex } from "./codec";
 import { createKitchen, type Kitchen } from "./kitchen";
 import { INDEX_B64 } from "./kitchenData";

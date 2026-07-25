@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Giftedx
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /**
  * Emoji artwork sets for the picker grid.
  *

@@ -1,73 +1,65 @@
-# dismoji — Emoji Kitchen mashups in Discord
+# EmojiMashup
 
-A [Vencord](https://vencord.dev) userplugin that lets you browse Google's Emoji
-Kitchen mashups and drop them straight into a message. Pick an emoji, browse the
-~475 mashups it actually has, click one to send.
+A [Vencord](https://vencord.dev) userplugin that adds a **Mashup** tab to Discord's
+emoji picker, for browsing and sending [Emoji Kitchen](https://emojikitchen.dev)
+combinations.
 
-147,000 mashups across 619 emoji, bundled — no API, no server, no account.
+Pick an emoji, browse the ~475 mashups it actually has, click one to send.
+147,000 combinations across 619 emoji, bundled — no API key, no server, no account.
 
-## Before you start
+<!-- TODO: screenshot of the Mashup tab, and one of a mashup sent in chat -->
 
-**The standard Vencord install cannot run this.** The installer ships a prebuilt
-bundle with no way to load custom plugins. Running any userplugin means building
-Vencord from source and injecting that build over your current one.
+## How it works
 
-This is a one-time setup, but it changes how you update Vencord afterwards: you
-pull and rebuild instead of running the installer. You can always go back by
-running the official Vencord installer again.
+Pick a left emoji from the grid, and the second page fills with **every mashup that
+emoji really has** — each cell showing the finished image rather than the ingredients.
+There are no dead ends: you only ever see combinations Google actually drew.
 
-Requires Node >= 22 and pnpm.
+Clicking one inserts its image URL into your message box. Discord embeds it
+server-side, so recipients see the image.
 
-## Install
+- **Search and category filter** over all 619 supported emoji
+- **Recent** row remembering your last 24 mashups
+- **Emoji sets** — render the picker in Twitter, Google or your system emoji style
+- Also available as a chat-bar button, which keeps working if the tab patch ever breaks
+
+## Installation
+
+Follow the official guide for
+[installing custom plugins](https://docs.vencord.dev/installing/custom-plugins/) —
+custom plugins require building Vencord from source.
+
+Once you have a source install, clone this into `src/userplugins`:
 
 ```bash
-git clone https://github.com/Vendicated/Vencord.git
-cd Vencord
-pnpm install --frozen-lockfile
-
-git clone <this-repo-url> src/userplugins/dismoji
-
-pnpm build
-pnpm inject
+git clone https://github.com/Giftedx/dismoji src/userplugins/dismoji
+pnpm build && pnpm inject
 ```
 
-`pnpm inject` is interactive — it asks which Discord install to patch. Restart
-Discord fully afterwards (quit from the tray, not just the window), then enable
-**EmojiMashup** in Vencord settings.
+Then restart Discord and enable **EmojiMashup** in Vencord settings.
 
-### Do not symlink the plugin
-
-Clone or copy it in — don't use a symlink or junction, and don't add a
-`tsconfig.json` next to `index.tsx`. esbuild resolves Vencord's `@api/*`,
-`@utils/*` and `@webpack/*` aliases from the nearest `tsconfig.json` walking up
-from each source file. A link resolves outside Vencord's tree, and a local
-`tsconfig.json` shadows Vencord's; both fail with
-`Could not resolve "@api/ChatButtons"`. That is why the dev config here is named
-`tsconfig.dev.json`.
-
-## Using it
-
-Click the mashup button in the chat bar. Pick a left emoji, then pick from its
-partners — every cell is the real mashup image, so you browse results rather than
-guessing at combinations. Clicking one drops its URL into your message box.
-
-Your last 24 mashups are kept in a **Recent** row.
+> **Clone it, don't symlink it.** esbuild resolves Vencord's `@api/*` and `@utils/*`
+> aliases from the nearest `tsconfig.json` above each source file. A symlink or
+> junction resolves outside Vencord's tree and breaks the build with
+> `Could not resolve "@api/ChatButtons"`. The dev config here is named
+> `tsconfig.dev.json` for the same reason — a `tsconfig.json` beside `index.tsx`
+> would shadow Vencord's.
 
 ### Preview permissions
 
-The mashup images are hosted on `www.gstatic.com`, which Vencord blocks by
-default. The first time you open the picker it offers to allow it, which opens
-Vencord's own host-permission dialog. You have to tick the trust checkbox and
-restart Discord.
+Mashup images are hosted on `www.gstatic.com`, which Vencord blocks by default. The
+first time you open the picker it offers to allow that host, which opens Vencord's
+own permission dialog; you'll need to tick the trust checkbox and restart Discord.
 
-**Declining is fine.** Sending still works either way — Discord fetches the image
-server-side, so everyone else sees it normally. You just won't see previews
-while picking.
+**Declining is fine.** Sending works either way, since Discord fetches the image
+server-side. Without the permission, combinations show as their two source emoji
+instead of a preview.
 
-### Settings
+## Settings
 
 | Setting | Default | Effect |
 |---|---|---|
+| Emoji set | Twitter | Artwork for the emoji you pick from — Twitter, Google, or system |
 | Send mode | Insert URL | Insert the URL into the message box, or copy it to the clipboard |
 | Auto-close | On | Close the picker after choosing a mashup |
 
@@ -75,59 +67,84 @@ while picking.
 
 ```bash
 pnpm install
-pnpm test        # unit + real-index integration tests
+pnpm test        # unit tests plus integration tests against the real index
 pnpm typecheck
 ```
 
-`codec.ts`, `kitchen.ts` and `loadKitchen.ts` have no React or Vencord imports,
-which is what makes them testable in isolation. `index.tsx` and
-`MashupPicker.tsx` are typechecked by Vencord's build instead.
+Linting uses Vencord's own config (it enforces the licence header and import
+order), so run it from your Vencord checkout:
+
+```bash
+pnpm exec eslint "src/userplugins/dismoji/**/*.{ts,tsx,mts}"
+```
+
+`codec.ts`, `kitchen.ts`, `emojiSets.ts` and `loadKitchen.ts` import nothing from
+React or Vencord, which is what makes them testable in isolation. `index.tsx` and
+`MashupPicker.tsx` are typechecked by Vencord's build instead — `tsconfig.dev.json`
+deliberately excludes them.
 
 ### Regenerating the index
 
 `kitchenData.ts` is generated and committed. Rebuild it when Google ships new
-mashups (roughly quarterly):
+mashups (historically a few times a year):
 
 ```bash
 NODE_OPTIONS=--max-old-space-size=4096 pnpm build-index
 ```
 
-This downloads the ~94 MB upstream metadata, strips it to a ~375 KB gzipped
-index, asserts invariants (619 emoji, >=140k pairs, dates fitting the 7-bit
-field), and HEAD-checks 20 sampled URLs against live gstatic. Any of those
-failing aborts the build rather than shipping a broken index.
-
-Set `METADATA_PATH` to reuse a local copy instead of re-downloading.
+It downloads the ~94 MB upstream metadata, strips it to a 375 KB gzipped index,
+asserts invariants (619 emoji, at least 140k pairs, dates fitting the 7-bit field),
+and HEAD-checks 20 sampled URLs against live gstatic. Any failure aborts the build
+rather than shipping something broken. Set `METADATA_PATH` to reuse a local copy.
 
 ### Why the index is packed
 
-The upstream metadata is ~94 MB of JSON, almost all of it derivable. Every asset
-URL follows `.../emojikitchen/{date}/{L}/{L}_{R}.png`, so the only fact worth
-storing per pair is its date — plus one bit of orientation, because the URL's
-left-hand emoji is not the lower-indexed one (it is in only 62,501 of 147,000
-pairs, so inferring it would break 57% of lookups).
+The upstream metadata is ~94 MB of JSON, almost all of it derivable. Every asset URL
+follows `.../emojikitchen/{date}/{L}/{L}_{R}.png`, so the only facts worth storing
+per pair are its date and one bit of orientation — the URL's left-hand emoji is the
+lower-indexed one in just 62,501 of 147,000 pairs, so inferring it would break 57%
+of lookups. That gets each pair down to 5 bytes, and the dataset to 375 KB gzipped.
 
-That reduces each pair to 5 bytes, and the whole dataset to 783 KB packed /
-375 KB gzipped.
+One rule to know before touching URL building: **every codepoint component takes its
+own `u` prefix**. `263a-fe0f` becomes `u263a-ufe0f`, not `u263a-fe0f`. The naive form
+matches only 75.9% of pairs and 404s on the rest. Tests pin this.
 
-One rule worth knowing if you touch URL building: **every codepoint component
-takes its own `u` prefix** — `263a-fe0f` becomes `u263a-ufe0f`, not `u263a-fe0f`.
-The naive form matches only 75.9% of pairs and 404s on the rest. There are tests
-pinning this.
+### The picker tab patch
 
-## Credits
+The tab is a webpack patch against Discord's minified expression picker, so it will
+eventually break when Discord reships their bundle. When it does, Vencord logs
+`Patch by EmojiMashup had no effect` and undoes the patch group — the picker is left
+untouched and the chat-bar button keeps working.
 
-Mashup artwork © Google, from
-[Emoji Kitchen](https://emojikitchen.dev). Pair metadata from
-[xsalazar/emoji-kitchen](https://github.com/xsalazar/emoji-kitchen).
+To re-derive the target module, run this in the Discord console:
 
-Images are hot-linked from Google's CDN, never redistributed. The bundled index
-contains only factual pair data (which combinations exist, and when they shipped).
+```js
+Object.keys(Vencord.Webpack.search("activeView", "soundboard"))
+```
+
+That returned exactly one module, whose source the three replacements in `index.tsx`
+are written against.
 
 ## Limitations
 
-- Emoji Kitchen covers 619 emoji, not the full Unicode set. Custom server emoji
-  can't be mashed up — Google has no artwork for them.
-- Only pairs Google actually drew exist. There is no algorithm generating these.
-- Mashups send as a URL, not as a real emoji — Discord has no mechanism for
-  sending arbitrary images inline as emoji.
+- Emoji Kitchen covers **619 emoji**, not the full Unicode set, and only the pairs
+  Google actually drew. There is no algorithm generating these.
+- **Custom server emoji can't be mashed up** — Google has no artwork for them.
+- **Mashups themselves can't be restyled.** The emoji-set setting changes the emoji
+  you pick from, not the combinations, which are always Google's artwork.
+- Mashups send as a URL, not as a real emoji. Discord has no mechanism for sending
+  arbitrary images inline as emoji.
+- The Google emoji set covers 617/619 — ©️ and ®️ have no Noto asset and fall back
+  to your system font.
+
+## Credits
+
+Mashup artwork © Google, from [Emoji Kitchen](https://emojikitchen.dev).
+Pair metadata from [xsalazar/emoji-kitchen](https://github.com/xsalazar/emoji-kitchen).
+
+Images are hot-linked from Google's CDN and never redistributed. The bundled index
+holds only factual pair data: which combinations exist and when they shipped.
+
+## Licence
+
+[GPL-3.0-or-later](./LICENSE), matching Vencord.

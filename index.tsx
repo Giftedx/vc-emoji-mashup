@@ -1,7 +1,12 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Giftedx
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "./styles.css";
 
 import { ChatBarButton, type ChatBarButtonFactory } from "@api/ChatButtons";
-import { Devs } from "@utils/constants";
 import { copyWithToast, insertTextIntoChatInputBox } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -62,7 +67,7 @@ export default definePlugin({
     name: "EmojiMashup",
     description: "Browse and send Google Emoji Kitchen mashups from the emoji picker",
     tags: ["Emoji", "Chat"],
-    authors: [Devs.Ven],
+    authors: [{ name: "Giftedx", id: 258276274726895617n }],
     settings,
 
     /** The custom ExpressionPicker view key. Referenced by the patches below. */
@@ -77,7 +82,11 @@ export default definePlugin({
     // active-view variable, the jsx factory — is module-local and minified, so it
     // is captured through the regexes rather than referenced by name. All three
     // replacements were verified to match exactly once against the real module
-    // (Discord build 582977); see the spec for the source excerpt.
+    // source, on Discord build 582977.
+    //
+    // To re-derive these after a Discord update, run this in the client console:
+    //   Object.keys(Vencord.Webpack.search("activeView", "soundboard"))
+    // That returned exactly one module, whose source is the patch target.
     //
     // If Discord reships and a match stops applying, Vencord logs
     // "Patch by EmojiMashup had no effect" and undoes the group, leaving the
@@ -94,12 +103,12 @@ export default definePlugin({
             {
                 // Append it to the end of the tablist, after Discord's own tabs.
                 match: /(\]\}\)\}\):null,)(\i===\i\.\i\.STICKER)/,
-                replace: ',vcMashupTab$1$2'
+                replace: ",vcMashupTab$1$2"
             },
             {
                 // Render our panel when the view is active, after the last case.
                 match: /(\i&&(\i)===\i\.\i\.KAOMOJI\?\(0,(\i)\.jsx\)\(\i,\{onSelect:\i\}\):null)/,
-                replace: '$1,$2===$self.VIEW?(0,$3.jsx)($self.PickerPanel,{}):null'
+                replace: "$1,$2===$self.VIEW?(0,$3.jsx)($self.PickerPanel,{}):null"
             }
         ]
     }],

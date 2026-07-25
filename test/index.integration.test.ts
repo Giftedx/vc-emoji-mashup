@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Giftedx
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /**
  * Exercises the real generated index rather than a fixture.
  *

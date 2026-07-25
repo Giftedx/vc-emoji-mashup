@@ -1,6 +1,12 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Giftedx
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { React, ScrollerThin, Select, TextInput, useEffect, useMemo, useState } from "@webpack/common";
 
-import { type EmojiSet, emojiAssetUrls } from "./emojiSets";
+import { emojiAssetUrls,type EmojiSet } from "./emojiSets";
 import { type Kitchen, type Mashup, toEmojiChar } from "./kitchen";
 import { loadKitchen } from "./loadKitchen";
 import { getRecents, pushRecent, type Recent } from "./recents";
