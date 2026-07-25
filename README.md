@@ -58,7 +58,7 @@ custom plugins require building Vencord from source.
 Once you have a source install, clone this into `src/userplugins`:
 
 ```bash
-git clone https://github.com/Giftedx/dismoji src/userplugins/dismoji
+git clone https://github.com/Giftedx/vc-emoji-mashup src/userplugins/emojiMashup
 pnpm build && pnpm inject
 ```
 
@@ -101,7 +101,7 @@ Linting uses Vencord's own config (it enforces the licence header and import
 order), so run it from your Vencord checkout:
 
 ```bash
-pnpm exec eslint "src/userplugins/dismoji/**/*.{ts,tsx,mts}"
+pnpm exec eslint "src/userplugins/emojiMashup/**/*.{ts,tsx,mts}"
 ```
 
 `codec.ts`, `kitchen.ts`, `emojiSets.ts` and `loadKitchen.ts` import nothing from
