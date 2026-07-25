@@ -10,7 +10,7 @@ emoji picker, with two ways to combine emoji:
 
 Pick an emoji, browse the mashups it actually has, click one to send.
 
-<!-- TODO: screenshot of the Mashup tab, and one of a mashup sent in chat -->
+![EmojiMashup's Kitchen picker running in Discord](./docs/images/emoji-mashup-picker.png)
 
 ## How it works
 
@@ -22,7 +22,7 @@ Clicking one inserts its image URL into your message box. Discord embeds it
 server-side, so recipients see the image.
 
 - **Search and category filter** over all 619 supported emoji
-- **Recent** row remembering your last 24 mashups
+- **Recent** row remembering your last 24 Emoji Kitchen mashups
 - **Emoji sets** — render the picker in Twitter, Google or your system emoji style
 - Also available as a chat-bar button, which keeps working if the tab patch ever breaks
 
@@ -86,8 +86,8 @@ instead of a preview.
 | Setting | Default | Effect |
 |---|---|---|
 | Emoji set | Twitter | Artwork for the emoji you pick from — Twitter, Google, or system |
-| Send mode | Insert URL | Insert the URL into the message box, or copy it to the clipboard |
-| Auto-close | On | Close the picker after choosing a mashup |
+| Send mode | Insert URL | For Kitchen: insert the URL into the message box, or copy it to the clipboard. Faces always open Discord's image-upload prompt |
+| Auto-close | On | Close either picker surface after choosing a mashup |
 
 ## Development
 
@@ -95,19 +95,31 @@ instead of a preview.
 pnpm install
 pnpm test        # unit tests plus integration tests against the real index
 pnpm typecheck
+pnpm verify-assets
+pnpm verify-host-layout -- C:\path\to\Vencord
 ```
 
-Linting uses Vencord's own config (it enforces the licence header and import
-order), so run it from your Vencord checkout:
+If pnpm aborts with `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` (it wants to
+rebuild `node_modules` but has no TTY to ask), run `CI=true pnpm install`.
+
+Linting and the Vencord-facing typecheck use Vencord's own configuration, so run
+them from your Vencord checkout after cloning this repository into
+`src/userplugins/emojiMashup`:
 
 ```bash
+pnpm build
+pnpm testTsc
 pnpm exec eslint "src/userplugins/emojiMashup/**/*.{ts,tsx,mts}"
 ```
 
 `codec.ts`, `kitchen.ts`, `emojiSets.ts` and `loadKitchen.ts` import nothing from
 React or Vencord, which is what makes them testable in isolation. `index.tsx` and
-`MashupPicker.tsx` are typechecked by Vencord's build instead — `tsconfig.dev.json`
-deliberately excludes them.
+`MashupPicker.tsx` are typechecked by Vencord's `testTsc` gate instead —
+`tsconfig.dev.json` deliberately excludes them. CI repeats the build, typecheck
+and lint against a fresh checkout of current Vencord so host API drift is visible
+before release. `verify-host-layout` runs the same three gates against a complete
+copy of this repository in a temporary worktree of the supplied Vencord checkout;
+the checkout must already have its dependencies installed.
 
 ### Regenerating the index
 
@@ -118,10 +130,12 @@ mashups (historically a few times a year):
 NODE_OPTIONS=--max-old-space-size=4096 pnpm build-index
 ```
 
-It downloads the ~94 MB upstream metadata, strips it to a 375 KB gzipped index,
-asserts invariants (619 emoji, at least 140k pairs, dates fitting the 7-bit field),
-and HEAD-checks 20 sampled URLs against live gstatic. Any failure aborts the build
-rather than shipping something broken. Set `METADATA_PATH` to reuse a local copy.
+It downloads the ~94 MB upstream metadata from a pinned commit, records the
+input's SHA-256 in the generated file, strips it to a 375 KB gzipped index,
+asserts invariants (619 emoji, at least 140k pairs, dates fitting the 7-bit
+field), and HEAD-checks 20 sampled URLs against live gstatic. Any failure aborts
+the build rather than shipping something broken. Set `METADATA_PATH` to reuse a
+local copy; its content hash is still recomputed and recorded.
 
 The Twemoji parts inventory for Faces mode has its own generator, pinned to an
 upstream commit so part URLs can't shift under a moving branch:
@@ -129,7 +143,11 @@ upstream commit so part URLs can't shift under a moving branch:
 ```bash
 pnpm build-parts     # regenerate twemojiParts.ts
 pnpm verify-parts    # confirm sampled layer URLs still resolve
+pnpm verify-assets   # check Kitchen, face layers, Twemoji and pinned Noto assets
 ```
+
+`verify-assets` applies a ten-second timeout to every request and also verifies
+the CORS header required to flatten the SVG face layers into a canvas safely.
 
 ### Why the index is packed
 
@@ -158,6 +176,19 @@ Object.keys(Vencord.Webpack.search("activeView", "soundboard"))
 
 That returned exactly one module, whose source the three replacements in `index.tsx`
 are written against.
+
+### Compatibility gate
+
+The deterministic release gate is:
+
+1. this repository's tests and typecheck;
+2. build, typecheck and lint inside current Vencord;
+3. live asset verification; and
+4. a real Discord smoke of both the patched tab and chat-bar fallback.
+
+The patch was last derived against Discord build **582977**. Treat that number as
+evidence of the last derivation, not a compatibility promise: Discord can replace
+the minified module at any time, while the chat-bar fallback remains independent.
 
 ## Limitations
 
