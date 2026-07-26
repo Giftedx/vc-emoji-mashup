@@ -165,21 +165,20 @@ matters.
 Step 5 stays manual: whether a mashup actually arrives in a channel needs a
 logged-in client, and no gate here does that for you.
 
-Last performed on 2026-07-26, against a client verified to be built from
-`b0fe997`. Both engines send: Kitchen inserting its URL, Faces uploading its
-flattened image, over the fetched index.
+Last performed on 2026-07-26 against a client verified to be built from
+`33b97cc` — the installed checkout's HEAD was compared to this repository's,
+matched exactly, and Vencord was rebuilt from it before the run. The picker was
+confirmed working by the maintainer after that rebuild, covering the paths this
+release changed: the Faces grid, sending from both engines, and the Recent row.
 
-**That record no longer covers HEAD.** Commits since have changed the send path
-itself — a load timeout in `mashRenderer.ts`, `crossOrigin` on the preview
-layers, serialised recents writes, a retryable index load, and one extra mouth
-in the Faces grid. Each is pinned by a test, and the automated gates above are
-green, but tests are not a send: nothing here has yet put a message in a channel
-from this code. Re-run the smoke against a client rebuilt from HEAD before
-treating step 5 as satisfied.
+The confirmation is the maintainer's, not a per-click transcript, so treat it as
+"the picker works from this commit" rather than proof of any individual branch.
 
-Not covered by the last run either, and so not claimed: the one-time migration
-of recents from the pre-rename storage key, and Faces remaining usable when the
-index fails to load.
+Not covered by that run, and so not claimed: the one-time migration of recents
+from the pre-rename storage key, Faces remaining usable when the index fails to
+load, the ten-second layer-load timeout actually firing, and the index retrying
+after a failed fetch. Those last two need a throttled or severed connection to
+reach, and are pinned by tests rather than by a send.
 
 The check before recording one of these matters. An earlier smoke was retracted
 because the installed plugin was a detached file copy that had drifted hours

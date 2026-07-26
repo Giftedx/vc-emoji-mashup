@@ -3,7 +3,7 @@
 Notable changes, newest first. Versions are tagged and mirrored on the
 [releases page](https://github.com/Giftedx/vc-emoji-mashup/releases).
 
-## Unreleased
+## [0.1.1] — 2026-07-26
 
 ### Fixed
 
@@ -58,4 +58,5 @@ Initial release.
   inside current Vencord, live asset verification, and a weekly check that the
   patch still applies to Discord's live bundle.
 
+[0.1.1]: https://github.com/Giftedx/vc-emoji-mashup/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Giftedx/vc-emoji-mashup/releases/tag/v0.1.0
