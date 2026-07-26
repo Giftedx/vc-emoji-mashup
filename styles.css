@@ -10,9 +10,13 @@
     padding: 8px 0 0;
 }
 
+/* Every other row here is flex: 0 0 auto, so at large text sizes the modes,
+   notice, header and controls can otherwise eat the whole 420px and collapse
+   the grid to nothing with no way to scroll to it. The floor keeps two rows of
+   cells reachable; in normal use the scroller is far bigger and it never binds. */
 .vc-mashup-scroller {
     flex: 1 1 auto;
-    min-height: 0;
+    min-height: 96px;
     padding: 0 8px 8px;
 }
 
@@ -258,4 +262,11 @@
     background: var(--brand-experiment);
     color: #fff;
     cursor: pointer;
+}
+
+/* Held while Vencord's own permission dialog is open, so a second one cannot
+   be queued behind the first. */
+.vc-mashup-allow:disabled {
+    opacity: 0.6;
+    cursor: default;
 }
