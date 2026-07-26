@@ -11,7 +11,7 @@
  * runtime from cut-up Twemoji: a base shape, one emoji's eyes, another's mouth.
  * That is only meaningful for faces, so coverage is 135 usable emoji rather
  * than 619. A pair works when the leader has eyes and a base and the follower
- * has a mouth — 135 leaders x 128 followers — and order matters, so swapping
+ * has a mouth — 135 leaders x 129 followers — and order matters, so swapping
  * the two gives a genuinely different face.
  *
  * Parts come from Ryhon0/open-emoji-mash (GPL-3.0), pinned to a commit.
@@ -83,7 +83,15 @@ export function leaders(): string[] {
     return PART_EMOJI.filter(canLead);
 }
 
-/** Emoji that can follow a given leader — the right-hand grid. */
+/**
+ * Emoji that can follow a given leader — the right-hand grid.
+ *
+ * Drawn from HAS_MOUTH rather than PART_EMOJI, because PART_EMOJI carries the
+ * *leader* requirement: it additionally demands a base shape. Following needs
+ * only a mouth, so filtering the leader list silently dropped 😚, whose mouth
+ * exists upstream and composites correctly. Sorted to match PART_EMOJI's own
+ * order, which is what keeps the grid's arrangement stable.
+ */
 export function followers(): string[] {
-    return PART_EMOJI.filter(canFollow);
+    return [...HAS_MOUTH].sort();
 }

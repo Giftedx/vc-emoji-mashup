@@ -12,11 +12,13 @@
  * Vitest installation provide the real test types.
  */
 declare module "vitest" {
+    export const afterEach: any;
     export const beforeAll: any;
     export const beforeEach: any;
     export const describe: any;
     export const expect: any;
     export const it: any;
+    export const vi: any;
 }
 
 declare module "vitest/config" {

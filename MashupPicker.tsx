@@ -78,13 +78,18 @@ type Mode = "kitchen" | "generated";
 /**
  * A generated mashup preview: three SVG layers stacked. The browser composites
  * them and lazy-loads as you scroll, so no canvas work happens until send.
+ *
+ * crossOrigin matches what mashRenderer requests at send time. The browser
+ * keeps separate cache entries per CORS mode, so without it every send
+ * re-fetches all three layers — and fails outright if the network has since
+ * dropped, despite the mashup being visibly on screen.
  */
 function GeneratedPreview({ parts }: { parts: MashParts; }) {
     return (
         <span className="vc-mashup-layers">
-            <img src={parts.base} alt="" loading="lazy" />
-            <img src={parts.eyes} alt="" loading="lazy" />
-            <img src={parts.mouth} alt="" loading="lazy" />
+            <img src={parts.base} alt="" loading="lazy" crossOrigin="anonymous" />
+            <img src={parts.eyes} alt="" loading="lazy" crossOrigin="anonymous" />
+            <img src={parts.mouth} alt="" loading="lazy" crossOrigin="anonymous" />
         </span>
     );
 }

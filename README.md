@@ -44,7 +44,7 @@ that Discord embeds.
 
 **Faces** is the [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot)
 lineage: mashups *composited at runtime* from cut-up Twemoji — a base shape, one
-emoji's eyes, another's mouth. 135 × 128 combinations, and order matters, so
+emoji's eyes, another's mouth. 135 × 129 combinations, and order matters, so
 swapping the two gives a different face. Faces only, since a coffee cup has no
 eyes to borrow. These are generated in your client, so they upload as an image
 attachment rather than a link.

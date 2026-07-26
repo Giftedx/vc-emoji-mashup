@@ -16,13 +16,29 @@ const KEY = "EmojiMashup_recents";
 const LEGACY_KEY = "dismoji-recents";
 const LIMIT = 24;
 
+/**
+ * DataStore is typed by assertion, not validation, so anything could be sitting
+ * under these keys. An unusable value renders straight into the Recent row and
+ * takes the whole picker down with it, so it is filtered to entries that
+ * actually have the three string fields, and capped — a legacy list predates
+ * LIMIT and can be longer.
+ */
+function sanitise(value: unknown): Recent[] {
+    if (!Array.isArray(value)) return [];
+
+    return value
+        .filter((r): r is Recent =>
+            typeof r?.left === "string" && typeof r?.right === "string" && typeof r?.url === "string")
+        .slice(0, LIMIT);
+}
+
 export async function getRecents(): Promise<Recent[]> {
-    const current = await DataStore.get<Recent[]>(KEY);
-    if (current !== undefined) return current;
+    const current = await DataStore.get<unknown>(KEY);
+    if (current !== undefined) return sanitise(current);
 
     // Preserve recents for existing installs after the plugin's working name
     // changed. The next successful push writes the combined list to KEY.
-    return (await DataStore.get<Recent[]>(LEGACY_KEY)) ?? [];
+    return sanitise(await DataStore.get<unknown>(LEGACY_KEY));
 }
 
 /** Most-recent-first, de-duplicated by URL, capped at LIMIT. */
@@ -30,9 +46,24 @@ export function mergeRecent(list: readonly Recent[], recent: Recent): Recent[] {
     return [recent, ...list.filter(r => r.url !== recent.url)].slice(0, LIMIT);
 }
 
+/**
+ * Serialises the read-modify-write, because picks are fired without awaiting
+ * (MashupPicker calls pickAndRemember with void). Two quick clicks would
+ * otherwise both read the pre-click list and the second write would drop the
+ * first pick — invisibly, since the picker's own state already shows it.
+ */
+let queue: Promise<unknown> = Promise.resolve();
+
 /** Most-recent-first, de-duplicated by URL, capped at LIMIT. */
-export async function pushRecent(recent: Recent): Promise<void> {
-    await DataStore.set(KEY, mergeRecent(await getRecents(), recent));
+export function pushRecent(recent: Recent): Promise<void> {
+    const next = queue.then(
+        async () => DataStore.set(KEY, mergeRecent(await getRecents(), recent))
+    );
+
+    // A failed write must not wedge every later one, so the chain continues
+    // from a settled promise while the caller still sees the rejection.
+    queue = next.catch(() => {});
+    return next;
 }
 
 /**

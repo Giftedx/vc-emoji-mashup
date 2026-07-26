@@ -62,12 +62,19 @@ export async function buildKitchen(readIndex: () => Promise<string>): Promise<Ki
  * the picker pay for it, and memoised so later opens are free.
  */
 export function loadKitchen(): Promise<Kitchen> {
+    // A rejected promise is not nullish, so ??= alone would memoise a failure
+    // for the lifetime of the client: open the picker once while offline and
+    // Kitchen mode stays broken until Discord restarts. Clearing the slot on
+    // rejection makes the next open retry.
     cached ??= buildKitchen(async () => {
         const response = await fetch(INDEX_URL);
         if (!response.ok) {
             throw new Error(`EmojiMashup: could not fetch the mashup index (${response.status} ${response.statusText})`);
         }
         return response.text();
+    }).catch(error => {
+        cached = null;
+        throw error;
     });
 
     return cached;

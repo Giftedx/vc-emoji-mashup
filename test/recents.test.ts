@@ -34,6 +34,48 @@ describe("recents storage", () => {
     });
 });
 
+describe("stored value handling", () => {
+    it("ignores a stored value that is not a list", async () => {
+        // DataStore is typed by assertion, so junk under the key would reach
+        // the Recent row's .map and take the whole picker down.
+        seed("EmojiMashup_recents", "not-a-list");
+
+        expect(await getRecents()).toEqual([]);
+    });
+
+    it("drops entries missing the fields the picker reads", async () => {
+        seed("EmojiMashup_recents", [PICK, { left: "2615" }, null, "nope"]);
+
+        expect(await getRecents()).toEqual([PICK]);
+    });
+
+    it("caps a legacy list that predates the limit", async () => {
+        seed("dismoji-recents", Array.from({ length: 40 }, (_, i) => ({
+            left: "2615",
+            right: "1f600",
+            url: `https://example.invalid/${i}.png`
+        })));
+
+        expect((await getRecents()).length).toBe(24);
+    });
+});
+
+describe("concurrent picks", () => {
+    it("keeps both when a second pick lands before the first write finishes", async () => {
+        const second = {
+            left: "1f642",
+            right: "1f643",
+            url: "https://example.invalid/second.png"
+        };
+
+        // Fired without awaiting, exactly as MashupPicker does. Unserialised,
+        // both reads see the empty list and the later write erases the earlier.
+        await Promise.all([pushRecent(PICK), pushRecent(second)]);
+
+        expect(await getRecents()).toEqual([second, PICK]);
+    });
+});
+
 describe("pickAndRemember", () => {
     it("performs the pick before persistence and survives a rejected write", async () => {
         const events: string[] = [];

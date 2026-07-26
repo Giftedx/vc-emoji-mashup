@@ -24,7 +24,9 @@ export async function renderMashup(parts: MashParts, name: string): Promise<File
     if (!ctx) throw new Error("EmojiMashup: could not get a 2d canvas context");
 
     // Sequential rather than parallel: draw order is the layer order, and these
-    // come from the CDN cache after the preview has already loaded them.
+    // come from the CDN cache after the preview has already loaded them — which
+    // holds only because the preview <img>s request in the same CORS mode this
+    // does. Drop crossOrigin there and every send re-fetches all three layers.
     for (const url of [parts.base, parts.eyes, parts.mouth]) {
         ctx.drawImage(await loadImage(url), 0, 0, SIZE, SIZE);
     }
@@ -35,14 +37,27 @@ export async function renderMashup(parts: MashParts, name: string): Promise<File
     return new File([blob], `${name}.png`, { type: "image/png" });
 }
 
+/** Matches the timeout verify-assets applies to the same hosts. */
+const LOAD_TIMEOUT_MS = 10_000;
+
 function loadImage(url: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
         const img = new Image();
+        // A stalled connection — open but delivering nothing — fires neither
+        // onload nor onerror, which would leave the click a silent permanent
+        // no-op: the picker never closes and no failure toast ever shows.
+        const timer = setTimeout(
+            () => reject(new Error(`EmojiMashup: timed out loading layer ${url}`)),
+            LOAD_TIMEOUT_MS
+        );
         // Required for canvas: without it the CDN-loaded SVG taints the canvas
         // and toBlob throws a security error.
         img.crossOrigin = "anonymous";
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error(`EmojiMashup: failed to load layer ${url}`));
+        img.onload = () => { clearTimeout(timer); resolve(img); };
+        img.onerror = () => {
+            clearTimeout(timer);
+            reject(new Error(`EmojiMashup: failed to load layer ${url}`));
+        };
         img.src = url;
     });
 }

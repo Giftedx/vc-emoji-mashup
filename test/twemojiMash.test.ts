@@ -27,6 +27,22 @@ describe("parts inventory", () => {
             expect(partsFor(cp, followers()[0])).not.toBeNull();
         }
     });
+
+    it("offers every emoji with a mouth, including ones that cannot lead", () => {
+        // 1f61a supplies a mouth but no base shape, so it can follow without
+        // being able to lead. followers() once filtered the leader list, which
+        // silently dropped it from the grid even though it composites fine.
+        expect(canFollow("1f61a")).toBe(true);
+        expect(canLead("1f61a")).toBe(false);
+        expect(followers()).toContain("1f61a");
+    });
+
+    it("builds real layers for every follower against a leader", () => {
+        const leader = leaders()[0];
+        for (const cp of followers()) {
+            expect(partsFor(leader, cp)).not.toBeNull();
+        }
+    });
 });
 
 describe("partsFor", () => {
