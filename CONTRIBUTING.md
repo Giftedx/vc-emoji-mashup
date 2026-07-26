@@ -14,8 +14,7 @@ setups.
 ## Before opening a PR
 
 ```bash
-pnpm test          # unit + integration tests
-pnpm typecheck     # the Vencord-independent code
+pnpm check         # typecheck + tests; run this before every push
 ```
 
 `index.tsx` and `MashupPicker.tsx` are deliberately outside the local typecheck;

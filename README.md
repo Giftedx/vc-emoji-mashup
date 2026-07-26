@@ -104,6 +104,7 @@ rules, [CHANGELOG.md](./CHANGELOG.md) the release history, and
 
 ```bash
 pnpm install
+pnpm check       # typecheck + tests, the two gates CI runs first
 pnpm test        # unit tests plus integration tests against the real index
 pnpm typecheck
 pnpm verify-assets

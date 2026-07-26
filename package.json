@@ -23,6 +23,7 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.dev.json --noEmit",
+    "check": "pnpm typecheck && pnpm test",
     "build-index": "tsx scripts/build-index.mts",
     "build-parts": "tsx scripts/build-parts.mts",
     "verify-parts": "tsx scripts/verify-parts.mts",
