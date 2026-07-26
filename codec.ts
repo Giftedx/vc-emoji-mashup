@@ -65,6 +65,11 @@ export function encodeIndex(raw: RawIndex): Uint8Array {
     if (raw.dates.some(d => d.length !== 8)) {
         throw new Error("EmojiMashup: every date must be exactly 8 characters (YYYYMMDD)");
     }
+    // The count goes out as a u16 below, which would silently wrap rather than
+    // fail, and every pair indexes into this table with a u16 of its own.
+    if (raw.emoji.length > 0xffff) {
+        throw new Error(`EmojiMashup: ${raw.emoji.length} emoji exceeds the 65535 addressable by a 16-bit index`);
+    }
 
     const enc = new TextEncoder();
     const emojiBytes = raw.emoji.map(e => enc.encode(e));
@@ -107,6 +112,15 @@ export function encodeIndex(raw: RawIndex): Uint8Array {
     for (const p of raw.pairs) {
         if (p.dateIndex < 0 || p.dateIndex >= MAX_DATES) {
             throw new Error(`EmojiMashup: date index ${p.dateIndex} does not fit in 7 bits`);
+        }
+        // Fitting the field is not the same as naming a row. An index past the
+        // table survives the round trip and only surfaces much later, as a URL
+        // with "undefined" where the date belongs — a 404 with nothing logged.
+        if (p.dateIndex >= raw.dates.length) {
+            throw new Error(`EmojiMashup: date index ${p.dateIndex} has no entry in the ${raw.dates.length}-date table`);
+        }
+        if (p.lo < 0 || p.lo >= raw.emoji.length || p.hi < 0 || p.hi >= raw.emoji.length) {
+            throw new Error(`EmojiMashup: pair (${p.lo}, ${p.hi}) falls outside the ${raw.emoji.length}-emoji table`);
         }
         view.setUint16(o, p.lo, true); o += 2;
         view.setUint16(o, p.hi, true); o += 2;

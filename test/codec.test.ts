@@ -28,6 +28,20 @@ describe("codec", () => {
         expect(decodeIndex(encodeIndex(sample))).toEqual(sample);
     });
 
+    it("rejects a date index that fits the field but names no row", () => {
+        // 7 bits hold it, so it encodes and decodes cleanly; the damage only
+        // shows up later as a URL with "undefined" where the date belongs.
+        const bad = { ...sample, pairs: [{ lo: 0, hi: 1, dateIndex: 5, loIsUrlLeft: true }] };
+
+        expect(() => encodeIndex(bad)).toThrow(/no entry in the 2-date table/);
+    });
+
+    it("rejects a pair pointing outside the emoji table", () => {
+        const bad = { ...sample, pairs: [{ lo: 0, hi: 9, dateIndex: 0, loIsUrlLeft: true }] };
+
+        expect(() => encodeIndex(bad)).toThrow(/outside the 3-emoji table/);
+    });
+
     it("preserves orientation flags independently of index order", () => {
         const out = decodeIndex(encodeIndex(sample));
         expect(out.pairs[0].loIsUrlLeft).toBe(true);

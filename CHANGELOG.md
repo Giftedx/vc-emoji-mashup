@@ -24,6 +24,10 @@ Notable changes, newest first. Versions are tagged and mirrored on the
   un-serialised read-modify-write, so the second write erased the first.
 - Junk stored under the recents key crashed the entire picker rather than the
   Recent row, because the stored value was cast rather than checked.
+- The encoder checked that a date index *fit* its 7-bit field but not that it
+  named a row, and never bounds-checked pair indices or the emoji count against
+  the 16-bit fields they are written to. Unreachable through the current
+  generator, but the codec is the wire format's only authority.
 
 - Mashup cells announced only the partner emoji to screen readers — a non-empty
   image `alt` outranks the button's `title` when the accessible name is
