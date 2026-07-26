@@ -91,6 +91,16 @@ export function createKitchen(raw: RawIndex): Kitchen {
         return row === undefined ? "" : (row.split("\t")[which] ?? "");
     }
 
+    const altCache = new Array(raw.emoji.length);
+    const keywordCache = new Array(raw.emoji.length);
+    for (let i = 0; i < raw.emoji.length; i++) {
+        altCache[i] = field(i, ALT).toLowerCase();
+        const kw = field(i, KEYWORDS);
+        keywordCache[i] = kw ? kw.toLowerCase().split(",") : [];
+    }
+
+    const partnersCache: Mashup[][] = new Array(raw.emoji.length);
+
     function findPair(a: string, b: string): number | null {
         const ia = indexOf.get(a);
         const ib = indexOf.get(b);
@@ -122,7 +132,9 @@ export function createKitchen(raw: RawIndex): Kitchen {
             const i = indexOf.get(codepoint);
             if (i === undefined) return [];
 
-            return adjacency[i].map(pi => {
+            if (partnersCache[i]) return partnersCache[i];
+
+            return partnersCache[i] = adjacency[i].map(pi => {
                 const p = raw.pairs[pi];
                 const other = p.lo === i ? p.hi : p.lo;
                 return {
@@ -144,13 +156,13 @@ export function createKitchen(raw: RawIndex): Kitchen {
 
             const hits: string[] = [];
             for (let i = 0; i < raw.emoji.length; i++) {
-                const alt = field(i, ALT).toLowerCase();
+                const alt = altCache[i];
                 if (alt.includes(q)) {
                     hits.push(raw.emoji[i]);
                     continue;
                 }
-                const keywords = field(i, KEYWORDS).toLowerCase();
-                if (keywords && keywords.split(",").some(k => k.includes(q))) {
+                const keywords = keywordCache[i];
+                if (keywords.some(k => k.includes(q))) {
                     hits.push(raw.emoji[i]);
                 }
             }
