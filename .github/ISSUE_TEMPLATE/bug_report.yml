@@ -1,0 +1,37 @@
+name: Bug report
+description: The tab is missing, mashups don't send, or the picker misbehaves
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the Mashup tab has disappeared, open the console (Ctrl+Shift+I) and look for
+        `Patch by EmojiMashup had no effect` first — that means Discord reshipped the
+        expression picker and the patch needs re-deriving. The weekly CI run watches for
+        exactly this, so check whether [CI](https://github.com/Giftedx/vc-emoji-mashup/actions)
+        is already red before filing.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: plugin-commit
+    attributes:
+      label: Plugin commit
+      description: "`git -C src/userplugins/emojiMashup rev-parse --short HEAD` inside your Vencord checkout."
+    validations:
+      required: true
+  - type: input
+    id: vencord-version
+    attributes:
+      label: Vencord version
+      description: Shown in Vencord's settings, or `git rev-parse --short HEAD` in the Vencord checkout.
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Anything mentioning EmojiMashup in the DevTools console.
+      render: text
