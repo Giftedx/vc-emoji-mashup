@@ -5,11 +5,14 @@ sure the gates below are green.
 
 ## Setup
 
-Everything about the development setup — including why you must **clone, not
-symlink** into `src/userplugins`, and why the tsconfig is named
-`tsconfig.dev.json` — lives in the [Development](./README.md#development)
-section of the README. Read it first; those two gotchas account for most broken
-setups.
+Read [Installation](./README.md#installation) first — it explains why you must
+**clone, not symlink** into `src/userplugins`, and why the tsconfig here is named
+`tsconfig.dev.json` rather than shadowing Vencord's. Those two account for most
+broken setups.
+
+[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) has the rest: the full gate list,
+regenerating the packed index, and the design rationale behind the patch and the
+fetched index.
 
 ## Before opening a PR
 
