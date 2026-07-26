@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Vencord support
+    url: https://vencord.dev/discord
+    about: Problems installing or building Vencord itself, rather than this plugin.
+  - name: Emoji Kitchen coverage
+    url: https://emojikitchen.dev
+    about: Whether a particular pair exists is Google's call, not this plugin's — check here first.

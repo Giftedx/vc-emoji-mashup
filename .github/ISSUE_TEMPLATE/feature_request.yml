@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest something the picker should do
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Worth checking [Limitations](https://github.com/Giftedx/vc-emoji-mashup#limitations)
+        first — several natural requests (restyling Kitchen mashups, custom server emoji,
+        Microsoft Fluent mashups, sending as a real inline emoji) are ruled out by what
+        upstream data and Discord actually allow, rather than by effort.
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What should it do
+      description: The behaviour you want, and what you're trying to accomplish with it.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Anything you tried or rejected, if relevant.
