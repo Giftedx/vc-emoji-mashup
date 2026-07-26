@@ -261,12 +261,19 @@ logged-in client, and no gate here does that for you.
 
 Last performed on 2026-07-26, against a client verified to be built from
 `b0fe997`. Both engines send: Kitchen inserting its URL, Faces uploading its
-flattened image, over the fetched index. Commits since then have changed only
-this file and `styles.css`, so no sending behaviour has moved under the result.
+flattened image, over the fetched index.
 
-Not covered by that run, and so not claimed: the one-time migration of recents
-from the pre-rename storage key, and Faces remaining usable when the index fails
-to load.
+**That record no longer covers HEAD.** Commits since have changed the send path
+itself — a load timeout in `mashRenderer.ts`, `crossOrigin` on the preview
+layers, serialised recents writes, a retryable index load, and one extra mouth
+in the Faces grid. Each is pinned by a test, and the automated gates above are
+green, but tests are not a send: nothing here has yet put a message in a channel
+from this code. Re-run the smoke against a client rebuilt from HEAD before
+treating step 5 as satisfied.
+
+Not covered by the last run either, and so not claimed: the one-time migration
+of recents from the pre-rename storage key, and Faces remaining usable when the
+index fails to load.
 
 The check before recording one of these matters. An earlier smoke was retracted
 because the installed plugin was a detached file copy that had drifted hours
