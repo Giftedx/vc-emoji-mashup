@@ -2,5 +2,6 @@
 kitchenIndexMeta.ts linguist-generated=true
 twemojiParts.ts linguist-generated=true
 
-# Generated payload, not source.
-kitchenIndex.b64 linguist-generated=true
+# Generated payload, not source. -diff keeps regeneration commits readable:
+# the file is a single half-megabyte base64 line no diff of which means anything.
+kitchenIndex.b64 linguist-generated=true -diff

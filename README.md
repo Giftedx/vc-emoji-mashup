@@ -1,6 +1,7 @@
 # EmojiMashup
 
 [![CI](https://github.com/Giftedx/vc-emoji-mashup/actions/workflows/ci.yml/badge.svg)](https://github.com/Giftedx/vc-emoji-mashup/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Giftedx/vc-emoji-mashup)](https://github.com/Giftedx/vc-emoji-mashup/releases/latest)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](./LICENSE)
 
 A [Vencord](https://vencord.dev) userplugin that adds a **Mashup** tab to Discord's
@@ -92,6 +93,10 @@ instead of a preview.
 | Auto-close | On | Close either picker surface after choosing a mashup |
 
 ## Development
+
+Contributions are welcome — [CONTRIBUTING.md](./CONTRIBUTING.md) has the ground
+rules, [CHANGELOG.md](./CHANGELOG.md) the release history, and
+[SECURITY.md](./SECURITY.md) how to report a vulnerability privately.
 
 ```bash
 pnpm install
