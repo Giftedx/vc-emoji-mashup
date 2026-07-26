@@ -162,7 +162,7 @@ export function createKitchen(raw: RawIndex): Kitchen {
                     continue;
                 }
                 const keywords = keywordCache[i];
-                if (keywords.some(k => k.includes(q))) {
+                if (keywords.some((k: string) => k.includes(q))) {
                     hits.push(raw.emoji[i]);
                 }
             }
