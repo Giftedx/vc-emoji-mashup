@@ -3,6 +3,21 @@
   "version": "0.1.0",
   "description": "Vencord userplugin adding a Mashup tab to Discord's emoji picker — Emoji Kitchen combinations plus generated Twemoji face mashups",
   "license": "GPL-3.0-or-later",
+  "author": "Giftedx",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Giftedx/vc-emoji-mashup.git"
+  },
+  "homepage": "https://github.com/Giftedx/vc-emoji-mashup#readme",
+  "bugs": "https://github.com/Giftedx/vc-emoji-mashup/issues",
+  "keywords": [
+    "vencord",
+    "vencord-plugin",
+    "discord",
+    "emoji",
+    "emoji-kitchen",
+    "twemoji"
+  ],
   "type": "module",
   "private": true,
   "scripts": {
