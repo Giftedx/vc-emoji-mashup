@@ -246,10 +246,10 @@ matters.
 Step 5 stays manual: whether a mashup actually arrives in a channel needs a
 logged-in client, and no gate here does that for you.
 
-Last performed on 2026-07-26, against a client built from the clone at
-`b0fe997` — which differs from this file's commit only in this file, so the
-running code was the shipped code. Both engines send: Kitchen inserting its URL,
-Faces uploading its flattened image, over the fetched index.
+Last performed on 2026-07-26, against a client verified to be built from
+`b0fe997`. Both engines send: Kitchen inserting its URL, Faces uploading its
+flattened image, over the fetched index. Commits since then have changed only
+this file and `styles.css`, so no sending behaviour has moved under the result.
 
 Not covered by that run, and so not claimed: the one-time migration of recents
 from the pre-rename storage key, and Faces remaining usable when the index fails
