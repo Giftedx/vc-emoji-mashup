@@ -11,6 +11,13 @@ on:
   # this is what makes the upstream job below an actual early warning.
   schedule:
     - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+# A newer push supersedes the running check of the same ref; the weekly
+# drift run is never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' }}
 
 jobs:
   test:
