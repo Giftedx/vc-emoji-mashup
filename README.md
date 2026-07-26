@@ -8,13 +8,17 @@ A [Vencord](https://vencord.dev) userplugin that adds a **Mashup** tab to Discor
 emoji picker, with two ways to combine emoji:
 
 - **[Emoji Kitchen](https://emojikitchen.dev)** — 147,000 combinations across 619
-  emoji, hand-drawn by Google. Bundled, so no API key, server or account.
+  emoji, hand-drawn by Google. No API key, server or account.
 - **Faces** — mashups built at runtime from cut-up Twemoji, in the style of the
   original [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot).
 
 Pick an emoji, browse the mashups it actually has, click one to send.
 
 ![EmojiMashup's Kitchen picker running in Discord](./docs/images/emoji-mashup-picker.png)
+
+**[How it works](#how-it-works)** · **[Installation](#installation)** ·
+**[Settings](#settings)** · **[Development](#development)** ·
+**[Limitations](#limitations)** · **[Credits](#credits)**
 
 ## How it works
 
@@ -90,7 +94,7 @@ instead of a preview.
 |---|---|---|
 | Emoji set | Twitter | Artwork for the emoji you pick from — Twitter, Google, or system |
 | Send mode | Insert URL | For Kitchen: insert the URL into the message box, or copy it to the clipboard. Faces always open Discord's image-upload prompt |
-| Auto-close | On | Close either picker surface after choosing a mashup |
+| Auto-close | On | Close the picker after choosing a mashup |
 
 ## Development
 
@@ -294,7 +298,7 @@ silently ships a second copy of the plugin.
 
 Kitchen mashup artwork © Google, from [Emoji Kitchen](https://emojikitchen.dev).
 Pair metadata from [xsalazar/emoji-kitchen](https://github.com/xsalazar/emoji-kitchen).
-Images are hot-linked from Google's CDN and never redistributed; the bundled index
+Images are hot-linked from Google's CDN and never redistributed; the packed index
 holds only factual pair data — which combinations exist and when they shipped.
 
 Faces mode uses cut-up Twemoji parts from
