@@ -134,6 +134,6 @@ fetched from jsDelivr at a pinned commit. Twemoji artwork © Twitter, CC-BY 4.0.
 technique comes from Louan Bengmah's
 [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot).
 
-## Licence
+## License
 
 [GPL-3.0-or-later](./LICENSE), the same as Vencord.
