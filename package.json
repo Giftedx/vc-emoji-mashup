@@ -1,6 +1,6 @@
 {
   "name": "vc-emoji-mashup",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A Vencord userplugin that adds a Mashup tab to Discord's emoji picker. It combines emoji two ways: 147,000 Emoji Kitchen images drawn at Google, and face mashups built in your client from cut-up Twemoji.",
   "license": "GPL-3.0-or-later",
   "author": "Giftedx",

@@ -3,6 +3,28 @@
 The notable changes, newest first. Each version is tagged, and the
 [releases page](https://github.com/Giftedx/vc-emoji-mashup/releases) mirrors them.
 
+## [0.1.2] - 2026-07-27
+
+### Changed
+
+- Five strings in the picker no longer use an em dash: the Faces hint, the
+  blocked-preview notice, the refused-permission toast, and the two count headers
+  above the second page. The headers now read `name: n mashups`.
+
+### Docs
+
+- Rewrote the README, development guide, contributing guide, security policy,
+  changelog and PR template in Simplified Technical English. The README is down
+  from 922 to 843 words, and repetition across sections accounts for most of the
+  cut. No fact was removed.
+- Corrected the claim that Faces is unaffected by network loss. Its parts
+  inventory is bundled rather than fetched, but the layer images come from
+  jsDelivr, so a total network loss disables both engines. Only an index failure
+  degrades the picker to Faces.
+- Corrected the recorded patch verification from Discord build 582977 to 584177,
+  with module 731231 unchanged.
+- Refreshed the picker screenshot and added one of the Faces grid.
+
 ## [0.1.1] - 2026-07-26
 
 ### Fixed
@@ -60,5 +82,6 @@ Initial release.
   inside current Vencord, live asset verification, and a weekly check that the
   patch still applies to Discord's live bundle.
 
+[0.1.2]: https://github.com/Giftedx/vc-emoji-mashup/releases/tag/v0.1.2
 [0.1.1]: https://github.com/Giftedx/vc-emoji-mashup/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Giftedx/vc-emoji-mashup/releases/tag/v0.1.0
