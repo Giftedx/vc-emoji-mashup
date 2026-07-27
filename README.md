@@ -47,6 +47,8 @@ different face. This engine covers faces only, because a coffee cup has no eyes 
 lend. It reaches pairs Google never drew, which is what the original bot made
 before Emoji Kitchen existed.
 
+![The Faces grid, built from cut-up Twemoji parts](./docs/images/emoji-mashup-faces.png)
+
 ## Installation
 
 Follow the official guide to

@@ -164,21 +164,22 @@ only surface, so that failure is the warning that matters.
 Step 5 stays manual. Whether a mashup arrives in a channel needs a client that is
 signed in, and no gate here does that.
 
-The last run was on 2026-07-27, against a client built from `df7a063`. The
-installed clone was fast-forwarded to that commit and its tree confirmed clean,
-Vencord was rebuilt from it, and the rebuilt `dist/renderer.js` was checked to
-contain the plugin before the run. The maintainer then confirmed the Mashup tab
-opens, the Kitchen and Faces grids populate, and both engines send: a Kitchen
-mashup embeds from its URL, and a Faces mashup uploads as an attachment. A new send
-lands at the front of the Recent row, and 😚 appears among the Faces mouths, which
-covers the two picker fixes in 0.1.1.
+The last run was on 2026-07-27, in two parts.
+
+The send paths were confirmed against a client built from `df7a063`. The installed
+clone was fast-forwarded to that commit and its tree confirmed clean, and Vencord
+was rebuilt from it. The rebuilt `dist/renderer.js` was checked to contain the
+plugin before the run. The maintainer confirmed that the Mashup tab opens and both
+grids populate. A Kitchen mashup embeds from its URL, and a Faces mashup uploads as
+an attachment. A new send lands at the front of the Recent row, and 😚 appears among
+the Faces mouths. Those last two cover the picker fixes in 0.1.1.
+
+The picker text was then confirmed against a client rebuilt from `4aae601`. That
+commit changed five strings and nothing else. The Faces hint, the two count headers
+and the blocked-preview notice all render their current wording.
 
 That is the maintainer's word, not a transcript of each click. Read it as "the
 picker works from this commit", not as proof of any single branch.
-
-That run predates the current HEAD. The only source change since `df7a063` is the
-wording of five strings in the picker, so the record covers the behaviour but not
-the exact bundle. Confirm the Faces hint and the count header at the next rebuild.
 
 The run did not cover, and this page does not claim: migrating recents from the
 pre-rename storage key, Faces staying usable when the index fails to load, the
