@@ -176,6 +176,10 @@ covers the two picker fixes in 0.1.1.
 That is the maintainer's word, not a transcript of each click. Read it as "the
 picker works from this commit", not as proof of any single branch.
 
+That run predates the current HEAD. The only source change since `df7a063` is the
+wording of five strings in the picker, so the record covers the behaviour but not
+the exact bundle. Confirm the Faces hint and the count header at the next rebuild.
+
 The run did not cover, and this page does not claim: migrating recents from the
 pre-rename storage key, Faces staying usable when the index fails to load, the
 ten-second layer timeout firing, and the index retrying after a failed fetch. The

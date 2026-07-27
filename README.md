@@ -22,9 +22,9 @@ Select an emoji, browse the mashups it has, then click one to send it.
 
 ## How it works
 
-Select a left emoji. The second page fills with every mashup that emoji has, and
-each cell shows the finished image. You see only combinations that exist, so no
-cell is a dead end.
+Pick any emoji on the first page. The second page fills with every mashup that
+emoji has, and each cell shows the finished image. You see only combinations that
+exist, so no cell is a dead end.
 
 Click a cell and the plugin puts the image URL into your message box. Discord
 embeds it on the server, so the recipients see the image.

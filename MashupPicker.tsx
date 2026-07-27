@@ -211,7 +211,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
         <div className="vc-mashup-notice">
             <div>
                 Previews are blocked, so combinations show as plain emoji below. Picking
-                and sending still work — Discord fetches the image server-side, so
+                and sending still work. Discord fetches the image server-side, so
                 everyone else sees the real mashup.
             </div>
             <button
@@ -224,7 +224,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
             </button>
             <small role="status">
                 {previewRequest === "refused"
-                    ? "Previews were not enabled. Sending still works — everyone else sees the real mashup."
+                    ? "Previews were not enabled. Sending still works, and everyone else sees the real mashup."
                     : "Requires restarting Discord after allowing."}
             </small>
         </div>
@@ -276,7 +276,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                         </div>
                     </div>
                     <div className="vc-mashup-hint">
-                        Built from Twemoji parts — pick a face for the eyes, then one for the mouth.
+                        Built from Twemoji parts. Pick a face for the eyes, then one for the mouth.
                     </div>
                     <ScrollerThin className="vc-mashup-scroller" fade>
                         {list.length === 0
@@ -311,7 +311,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                         <span aria-hidden="true">‹</span> Back
                     </button>
                     <span className="vc-mashup-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
-                    <span className="vc-mashup-count">{nameOf(left)} — {follows.length} mouths</span>
+                    <span className="vc-mashup-count">{nameOf(left)}: {follows.length} mouths</span>
                 </div>
                 <div className="vc-mashup-controls">
                     <div className="vc-mashup-search">
@@ -482,7 +482,7 @@ export function MashupPicker({ onPick, onPickGenerated }: Props) {
                     <span aria-hidden="true">‹</span> Back
                 </button>
                 <span className="vc-mashup-chosen"><SetEmoji codepoint={left} set={emojiSet} /></span>
-                <span className="vc-mashup-count">{k.nameOf(left)} — {all.length} mashups</span>
+                <span className="vc-mashup-count">{k.nameOf(left)}: {all.length} mashups</span>
             </div>
 
             <div className="vc-mashup-controls">
