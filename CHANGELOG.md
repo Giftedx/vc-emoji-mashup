@@ -3,7 +3,7 @@
 The notable changes, newest first. Each version is tagged, and the
 [releases page](https://github.com/Giftedx/vc-emoji-mashup/releases) mirrors them.
 
-## [0.1.1] — 2026-07-26
+## [0.1.1] - 2026-07-26
 
 ### Fixed
 
@@ -41,19 +41,19 @@ The notable changes, newest first. Each version is tagged, and the
 - The grid could collapse to zero height at large text sizes, because every other
   row in the picker has a fixed height and the root hides the overflow.
 
-## [0.1.0] — 2026-07-26
+## [0.1.0] - 2026-07-26
 
 Initial release.
 
 - **Mashup tab** in Discord's expression picker, added by a webpack patch that
   Vencord undoes cleanly if Discord ships a new module.
-- **Kitchen engine** — Google's Emoji Kitchen, 147,000 combinations across 619
+- **Kitchen engine.** Google's Emoji Kitchen, 147,000 combinations across 619
   emoji. The packed index (375 KB gzipped, from ~94 MB of upstream metadata) is
   fetched at first open from a commit-pinned jsDelivr URL, and its SHA-256 is
   verified before decoding. Each mashup is sent as a URL that Discord embeds on the
   server.
-- **Faces engine** — Emoji Mashup Bot-style composites built at runtime from
-  cut-up Twemoji (135 × 128 ordered pairs), uploaded as an image attachment.
+- **Faces engine.** Emoji Mashup Bot-style composites built at runtime from cut-up
+  Twemoji (135 × 128 ordered pairs), uploaded as an image attachment.
 - Search, category filter, a Recent row that keeps the last 24 mashups, and
   Twitter/Google/system emoji-set rendering for the picker grid.
 - Deterministic release gate: unit and integration tests, build/typecheck/lint

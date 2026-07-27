@@ -7,9 +7,10 @@
 A [Vencord](https://vencord.dev) userplugin that adds a **Mashup** tab to Discord's
 emoji picker. Two engines combine emoji:
 
-- **[Emoji Kitchen](https://emojikitchen.dev)** — 147,000 combinations across 619
-  emoji, drawn by hand at Google. No API key, no server, no account.
-- **Faces** — composites built in your client from cut-up Twemoji, in the style of
+- **[Emoji Kitchen](https://emojikitchen.dev)** gives 147,000 combinations across
+  619 emoji, drawn by hand at Google. It needs no API key, no server and no
+  account.
+- **Faces** composites images in your client from cut-up Twemoji, in the style of
   the original [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot).
 
 Select an emoji, browse the mashups it has, then click one to send it.
@@ -31,7 +32,7 @@ embeds it on the server, so the recipients see the image.
 
 - **Search and category filter** over all 619 supported emoji
 - **Recent** row that keeps your last 24 Kitchen mashups
-- **Emoji sets** — draw the picker in the Twitter, Google or system style
+- **Emoji sets** that draw the picker in the Twitter, Google or system style
 
 ### Kitchen or Faces
 
