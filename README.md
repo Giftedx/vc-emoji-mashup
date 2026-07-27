@@ -7,11 +7,10 @@
 A [Vencord](https://vencord.dev) userplugin that adds a **Mashup** tab to Discord's
 emoji picker. Two engines combine emoji:
 
-- **[Emoji Kitchen](https://emojikitchen.dev)** gives 147,000 combinations across
-  619 emoji, drawn by hand at Google. It needs no API key, no server and no
-  account.
-- **Faces** composites images in your client from cut-up Twemoji, in the style of
-  the original [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot).
+- **[Emoji Kitchen](https://emojikitchen.dev)** has 147,000 combinations across 619
+  emoji, drawn by hand at Google. It needs no API key, no server and no account.
+- **Faces** builds images in your client from cut-up Twemoji, in the style of the
+  original [Emoji Mashup Bot](https://knowyourmeme.com/memes/sites/emoji-mashup-bot).
 
 Select an emoji, browse the mashups it has, then click one to send it.
 
@@ -30,9 +29,9 @@ cell is a dead end.
 Click a cell and the plugin puts the image URL into your message box. Discord
 embeds it on the server, so the recipients see the image.
 
-- **Search and category filter** over all 619 supported emoji
-- **Recent** row that keeps your last 24 Kitchen mashups
-- **Emoji sets** that draw the picker in the Twitter, Google or system style
+- **Search and a category filter** cover all 619 supported emoji.
+- The **Recent** row keeps your last 24 Kitchen mashups.
+- **Emoji sets** draw the picker in the Twitter, Google or system style.
 
 ### Kitchen or Faces
 
@@ -42,11 +41,11 @@ The **Kitchen / Faces** switch selects the engine.
 and faces, and the images carry more detail.
 
 **Faces** builds each image in your client from three Twemoji pieces: a base shape,
-one emoji's eyes, another's mouth. It uploads the result as an attachment. There
-are 135 × 129 combinations, and the order matters, so a reversed pair gives a
-different face. It covers faces only, because a coffee cup has no eyes to lend. It
-reaches pairs Google never drew, which is what the original bot made before Emoji
-Kitchen existed.
+one emoji's eyes, another's mouth. The plugin uploads the result as an attachment.
+There are 135 × 129 combinations, and the order matters, so a reversed pair gives a
+different face. This engine covers faces only, because a coffee cup has no eyes to
+lend. It reaches pairs Google never drew, which is what the original bot made
+before Emoji Kitchen existed.
 
 ## Installation
 
@@ -113,8 +112,8 @@ index, the webpack patch behind the tab, and the design rationale.
   cut-up Fluent parts to build them, and cutting them by hand is an art task.
 - A mashup sends as a URL, not as a true emoji. Discord cannot send an arbitrary
   image inline as an emoji.
-- The Google emoji set covers 617 of the 619. ©️ and ®️ have no Noto asset and use
-  your system font.
+- The Google emoji set covers 617 of 619. ©️ and ®️ have no Noto asset and use your
+  system font.
 - **Kitchen needs the network at first open**, because the plugin fetches the
   index. The plugin caches it for the session. Faces works without the index, but
   it fetches its layer images, so both engines need a connection.
